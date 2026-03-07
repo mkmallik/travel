@@ -1,5 +1,7 @@
-import { View, StyleSheet } from 'react-native';
-import { Text, Icon } from 'react-native-paper';
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { Text, Icon } from "react-native-paper";
+import { COLORS } from "../../utils/constants";
 
 interface EmptyStateProps {
   icon: string;
@@ -7,10 +9,10 @@ interface EmptyStateProps {
   subtitle?: string;
 }
 
-export function EmptyState({ icon, title, subtitle }: EmptyStateProps) {
+const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, subtitle }) => {
   return (
     <View style={styles.container}>
-      <Icon source={icon} size={64} color="#BDBDBD" />
+      <Icon source={icon} size={64} color={COLORS.border} />
       <Text variant="titleMedium" style={styles.title}>
         {title}
       </Text>
@@ -21,23 +23,26 @@ export function EmptyState({ icon, title, subtitle }: EmptyStateProps) {
       )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 32,
   },
   title: {
     marginTop: 16,
-    color: '#757575',
-    textAlign: 'center',
+    color: COLORS.textSecondary,
+    textAlign: "center",
   },
   subtitle: {
     marginTop: 8,
-    color: '#9E9E9E',
-    textAlign: 'center',
+    color: COLORS.textSecondary,
+    textAlign: "center",
   },
 });
+
+export default EmptyState;
+export { EmptyState };

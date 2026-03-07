@@ -1,13 +1,14 @@
-import { useState } from 'react';
-import { View, StyleSheet, ScrollView, Platform } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper';
-import { useRouter } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
-import * as ImagePicker from 'expo-image-picker';
-import { insertTravel } from '../../db/queries/travel';
-import { useCurrentTravel } from '../../hooks/useCurrentTravel';
-import { useAuth } from '../../hooks/useAuth';
-import { toISODate } from '../../utils/date';
+import { useState } from "react";
+import { StyleSheet, ScrollView } from "react-native";
+import { TextInput, Button } from "react-native-paper";
+import { useRouter } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import * as ImagePicker from "expo-image-picker";
+import { insertTravel } from "../../db/queries/travel";
+import { useCurrentTravel } from "../../hooks/useCurrentTravel";
+import { useAuth } from "../../hooks/useAuth";
+import { toISODate } from "../../utils/date";
+import { COLORS } from "../../utils/constants";
 
 export default function AddTravelScreen() {
   const db = useSQLiteContext();
@@ -15,16 +16,16 @@ export default function AddTravelScreen() {
   const { refreshTravels, setCurrentTravelId } = useCurrentTravel();
   const { user } = useAuth();
 
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState(toISODate(new Date()));
   const [endDate, setEndDate] = useState(toISODate(new Date()));
-  const [countries, setCountries] = useState('');
+  const [countries, setCountries] = useState("");
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       quality: 0.8,
     });
     if (!result.canceled && result.assets[0]) {
@@ -82,8 +83,8 @@ export default function AddTravelScreen() {
         mode="outlined"
         style={styles.input}
       />
-      <Button mode="outlined" icon="image" onPress={pickImage} style={styles.input}>
-        {coverUri ? 'Change Cover Photo' : 'Add Cover Photo'}
+      <Button mode="outlined" icon="image" onPress={pickImage} style={styles.input} textColor={COLORS.text}>
+        {coverUri ? "Change Cover Photo" : "Add Cover Photo"}
       </Button>
       <Button
         mode="contained"
@@ -101,7 +102,7 @@ export default function AddTravelScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   content: {
     padding: 16,
@@ -110,5 +111,6 @@ const styles = StyleSheet.create({
   input: {},
   saveButton: {
     marginTop: 8,
+    backgroundColor: COLORS.primary,
   },
 });

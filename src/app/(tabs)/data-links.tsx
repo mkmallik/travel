@@ -1,35 +1,20 @@
-import { useState, useCallback } from 'react';
-import { View, SectionList, StyleSheet, Linking } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
-import { List, Text, IconButton, Divider } from 'react-native-paper';
-import { useCurrentTravel } from '../../hooks/useCurrentTravel';
-import { getLinksByTravel, deleteLink } from '../../db/queries/links';
-import { TravelSelector } from '../../components/common/TravelSelector';
-import { EmptyState } from '../../components/common/EmptyState';
-import { FAB } from '../../components/common/FAB';
-import type { ImportantLink } from '../../types/database';
+import { useState, useCallback } from "react";
+import { View, SectionList, StyleSheet, Linking } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { List, Text, IconButton, Divider } from "react-native-paper";
+import { useCurrentTravel } from "../../hooks/useCurrentTravel";
+import { getLinksByTravel, deleteLink } from "../../db/queries/links";
+import { TravelSelector } from "../../components/common/TravelSelector";
+import { EmptyState } from "../../components/common/EmptyState";
+import { FAB } from "../../components/common/FAB";
+import { COLORS, TYPE_LABELS, TYPE_ICONS } from "../../utils/constants";
+import type { LinkData } from "../../types/database";
 
 interface Section {
   title: string;
-  data: ImportantLink[];
+  data: LinkData[];
 }
-
-const TYPE_LABELS: Record<string, string> = {
-  booking: 'Bookings',
-  transport: 'Transport',
-  activity: 'Activities',
-  restaurant: 'Restaurants',
-  other: 'Other',
-};
-
-const TYPE_ICONS: Record<string, string> = {
-  booking: 'bed',
-  transport: 'train',
-  activity: 'hiking',
-  restaurant: 'food',
-  other: 'link-variant',
-};
 
 export default function DataLinksTab() {
   const db = useSQLiteContext();
@@ -37,36 +22,12 @@ export default function DataLinksTab() {
   const { currentTravel } = useCurrentTravel();
   const [sections, setSections] = useState<Section[]>([]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (currentTravel) {
-        getLinksByTravel(db, currentTravel.travel_id).then((links) => {
-          const grouped: Record<string, ImportantLink[]> = {};
-          for (const link of links) {
-            const type = link.type || 'other';
-            if (!grouped[type]) grouped[type] = [];
-            grouped[type].push(link);
-          }
-          setSections(
-            Object.entries(grouped).map(([type, data]) => ({
-              title: TYPE_LABELS[type] ?? type,
-              data,
-            }))
-          );
-        });
-      } else {
-        setSections([]);
-      }
-    }, [currentTravel?.travel_id])
-  );
-
-  const handleDelete = async (linkId: number) => {
-    await deleteLink(db, linkId);
+  const loadLinks = useCallback(async () => {
     if (currentTravel) {
       const links = await getLinksByTravel(db, currentTravel.travel_id);
-      const grouped: Record<string, ImportantLink[]> = {};
+      const grouped: Record<string, LinkData[]> = {};
       for (const link of links) {
-        const type = link.type || 'other';
+        const type = link.type || "other";
         if (!grouped[type]) grouped[type] = [];
         grouped[type].push(link);
       }
@@ -76,7 +37,20 @@ export default function DataLinksTab() {
           data,
         }))
       );
+    } else {
+      setSections([]);
     }
+  }, [currentTravel?.travel_id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadLinks();
+    }, [loadLinks])
+  );
+
+  const handleDelete = async (linkId: number) => {
+    await deleteLink(db, linkId);
+    loadLinks();
   };
 
   const totalLinks = sections.reduce((sum, s) => sum + s.data.length, 0);
@@ -90,8 +64,8 @@ export default function DataLinksTab() {
           title="No Links"
           subtitle={
             currentTravel
-              ? 'Add useful links for your trip'
-              : 'Create a trip first'
+              ? "Add useful links for your trip"
+              : "Create a trip first"
           }
         />
       ) : (
@@ -103,16 +77,20 @@ export default function DataLinksTab() {
               {section.title}
             </Text>
           )}
-          ItemSeparatorComponent={() => <Divider />}
+          ItemSeparatorComponent={() => <Divider style={styles.divider} />}
           renderItem={({ item }) => (
             <List.Item
               title={item.title}
+              titleStyle={styles.linkTitle}
               description={item.url}
+              descriptionStyle={styles.linkUrl}
               descriptionNumberOfLines={1}
+              style={styles.listItem}
               left={(props) => (
                 <List.Icon
                   {...props}
-                  icon={TYPE_ICONS[item.type] ?? 'link-variant'}
+                  icon={TYPE_ICONS[item.type] ?? "link-variant"}
+                  color={COLORS.textSecondary}
                 />
               )}
               right={() => (
@@ -120,11 +98,13 @@ export default function DataLinksTab() {
                   <IconButton
                     icon="open-in-new"
                     size={20}
+                    iconColor={COLORS.primary}
                     onPress={() => Linking.openURL(item.url)}
                   />
                   <IconButton
                     icon="delete-outline"
                     size={20}
+                    iconColor={COLORS.error}
                     onPress={() => handleDelete(item.link_id)}
                   />
                 </View>
@@ -134,7 +114,7 @@ export default function DataLinksTab() {
         />
       )}
       {currentTravel && (
-        <FAB icon="plus" onPress={() => router.push('/link/add')} />
+        <FAB icon="plus" onPress={() => router.push("/link/add")} />
       )}
     </View>
   );
@@ -143,16 +123,28 @@ export default function DataLinksTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   sectionHeader: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#F5F5F5',
-    color: '#424242',
+    backgroundColor: COLORS.surfaceLight,
+    color: COLORS.textSecondary,
+  },
+  listItem: {
+    backgroundColor: COLORS.surface,
+  },
+  linkTitle: {
+    color: COLORS.text,
+  },
+  linkUrl: {
+    color: COLORS.textSecondary,
   },
   actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  divider: {
+    backgroundColor: COLORS.border,
   },
 });

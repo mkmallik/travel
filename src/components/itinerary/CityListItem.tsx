@@ -1,19 +1,20 @@
-import { StyleSheet, Image, View, Pressable } from 'react-native';
-import { Text, Divider } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import type { Itinerary } from '../../types/database';
-import dayjs from 'dayjs';
+import React from "react";
+import { StyleSheet, Image, View, Pressable } from "react-native";
+import { Text, Divider } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import type { ItineraryData } from "../../types/database";
+import { COLORS } from "../../utils/constants";
+import dayjs from "dayjs";
 
 interface CityListItemProps {
-  itinerary: Itinerary;
+  itinerary: ItineraryData;
   onPress: () => void;
 }
 
-export function CityListItem({ itinerary, onPress }: CityListItemProps) {
+const CityListItem: React.FC<CityListItemProps> = ({ itinerary, onPress }) => {
   return (
     <>
       <Pressable onPress={onPress} style={styles.row}>
-        {/* Thumbnail */}
         {itinerary.city_image_uri ? (
           <Image source={{ uri: itinerary.city_image_uri }} style={styles.thumbnail} />
         ) : (
@@ -24,36 +25,34 @@ export function CityListItem({ itinerary, onPress }: CityListItemProps) {
           </View>
         )}
 
-        {/* City + date */}
         <View style={styles.info}>
           <Text variant="titleMedium" style={styles.city} numberOfLines={1}>
             {itinerary.city}
           </Text>
           <Text variant="bodySmall" style={styles.date}>
-            {dayjs(itinerary.date).format('D/M/YYYY')}
+            {dayjs(itinerary.date).format("D/M/YYYY")}
           </Text>
         </View>
 
-        {/* Day badge */}
         <View style={styles.dayBadge}>
-          <MaterialCommunityIcons name="star" size={16} color="#777" />
+          <MaterialCommunityIcons name="star" size={16} color={COLORS.accent} />
           <Text variant="titleSmall" style={styles.dayText}>
             DAY{itinerary.day_no}
           </Text>
         </View>
       </Pressable>
-      <Divider />
+      <Divider style={styles.divider} />
     </>
   );
-}
+};
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     gap: 14,
   },
   thumbnail: {
@@ -62,33 +61,39 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   placeholderThumb: {
-    backgroundColor: '#E8F5E9',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: COLORS.primaryLight,
+    justifyContent: "center",
+    alignItems: "center",
   },
   placeholderLetter: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#1B5E20',
+    fontWeight: "700",
+    color: COLORS.primary,
   },
   info: {
     flex: 1,
   },
   city: {
-    fontWeight: '600',
-    color: '#222',
+    fontWeight: "600",
+    color: COLORS.text,
   },
   date: {
-    color: '#888',
+    color: COLORS.textSecondary,
     marginTop: 2,
   },
   dayBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   dayText: {
-    color: '#555',
-    fontWeight: '600',
+    color: COLORS.textSecondary,
+    fontWeight: "600",
+  },
+  divider: {
+    backgroundColor: COLORS.border,
   },
 });
+
+export default CityListItem;
+export { CityListItem };

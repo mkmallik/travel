@@ -1,4 +1,4 @@
-export interface User {
+export interface UserData {
   user_id: number;
   email: string;
   password_hash: string;
@@ -6,7 +6,7 @@ export interface User {
   created_at: string;
 }
 
-export interface Travel {
+export interface TravelData {
   travel_id: number;
   user_id: number;
   description: string;
@@ -16,7 +16,7 @@ export interface Travel {
   cover_image_uri: string | null;
 }
 
-export interface Itinerary {
+export interface ItineraryData {
   itinerary_id: number;
   travel_id: number;
   date: string;
@@ -38,7 +38,7 @@ export interface Itinerary {
   notes: string | null;
 }
 
-export interface Expense {
+export interface ExpenseData {
   expense_id: number;
   travel_id: number;
   itinerary_id: number | null;
@@ -52,7 +52,7 @@ export interface Expense {
   voice_note_uri: string | null;
 }
 
-export interface ImportantLink {
+export interface LinkData {
   link_id: number;
   travel_id: number | null;
   type: string;
@@ -61,27 +61,39 @@ export interface ImportantLink {
   icon_url: string | null;
 }
 
+export interface DailyTotalData {
+  date: string;
+  total_eur: number;
+  count: number;
+}
+
+export interface CategoryTotalData {
+  category: string;
+  total_eur: number;
+  count: number;
+}
+
 export type ExpenseCategory =
-  | 'food'
-  | 'transportation'
-  | 'activities'
-  | 'gifts/purchase';
+  | "food"
+  | "transportation"
+  | "activities"
+  | "gifts/purchase";
 
 export type TotalCategory =
-  | 'flights'
-  | 'visa_fee'
-  | 'cancellation'
-  | 'hotels'
-  | 'ferries'
-  | 'activities'
-  | 'trains'
-  | 'cabs'
-  | 'food'
-  | 'others';
+  | "flights"
+  | "visa_fee"
+  | "cancellation"
+  | "hotels"
+  | "ferries"
+  | "activities"
+  | "trains"
+  | "cabs"
+  | "food"
+  | "others";
 
 export type LinkType =
-  | 'booking'
-  | 'transport'
-  | 'activity'
-  | 'restaurant'
-  | 'other';
+  | "booking"
+  | "transport"
+  | "activity"
+  | "restaurant"
+  | "other";

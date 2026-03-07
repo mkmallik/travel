@@ -1,34 +1,26 @@
-import { MD3LightTheme } from 'react-native-paper';
+import { MD3DarkTheme } from "react-native-paper";
+import { COLORS } from "../utils/constants";
 
 export const theme = {
-  ...MD3LightTheme,
+  ...MD3DarkTheme,
   colors: {
-    ...MD3LightTheme.colors,
-    primary: '#1B5E20',
-    primaryContainer: '#A5D6A7',
-    secondary: '#FF8F00',
-    secondaryContainer: '#FFE082',
-    tertiary: '#0277BD',
-    tertiaryContainer: '#B3E5FC',
-    surface: '#FFFFFF',
-    surfaceVariant: '#F5F5F5',
-    background: '#FAFAFA',
-    error: '#D32F2F',
-    errorContainer: '#FFCDD2',
+    ...MD3DarkTheme.colors,
+    primary: COLORS.primary,
+    primaryContainer: COLORS.primaryLight,
+    secondary: COLORS.accent,
+    secondaryContainer: COLORS.accent + "25",
+    tertiary: COLORS.transportation,
+    tertiaryContainer: COLORS.transportation + "25",
+    surface: COLORS.surface,
+    surfaceVariant: COLORS.surfaceLight,
+    background: COLORS.background,
+    error: COLORS.error,
+    errorContainer: COLORS.error + "25",
+    onPrimary: "#FFFFFF",
+    onSurface: COLORS.text,
+    onSurfaceVariant: COLORS.textSecondary,
+    onBackground: COLORS.text,
+    outline: COLORS.border,
+    outlineVariant: COLORS.border,
   },
-};
-
-export const CATEGORY_COLORS: Record<string, string> = {
-  food: '#FF8F00',
-  transportation: '#0277BD',
-  activities: '#1B5E20',
-  'gifts/purchase': '#7B1FA2',
-  flights: '#D32F2F',
-  visa_fee: '#5D4037',
-  cancellation: '#616161',
-  hotels: '#1565C0',
-  ferries: '#00838F',
-  trains: '#283593',
-  cabs: '#F57F17',
-  others: '#9E9E9E',
 };

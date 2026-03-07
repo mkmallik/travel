@@ -1,27 +1,20 @@
-import { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { TextInput, Button, SegmentedButtons } from 'react-native-paper';
-import { useRouter } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
-import { useCurrentTravel } from '../../hooks/useCurrentTravel';
-import { insertLink } from '../../db/queries/links';
-
-const LINK_TYPES = [
-  { value: 'booking', label: 'Booking' },
-  { value: 'transport', label: 'Transport' },
-  { value: 'activity', label: 'Activity' },
-  { value: 'restaurant', label: 'Restaurant' },
-  { value: 'other', label: 'Other' },
-];
+import { useState } from "react";
+import { StyleSheet, ScrollView } from "react-native";
+import { TextInput, Button, SegmentedButtons } from "react-native-paper";
+import { useRouter } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { useCurrentTravel } from "../../hooks/useCurrentTravel";
+import { insertLink } from "../../db/queries/links";
+import { COLORS, LINK_TYPES } from "../../utils/constants";
 
 export default function AddLinkScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { currentTravel } = useCurrentTravel();
 
-  const [title, setTitle] = useState('');
-  const [url, setUrl] = useState('');
-  const [type, setType] = useState('other');
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+  const [type, setType] = useState("other");
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -62,7 +55,7 @@ export default function AddLinkScreen() {
       <SegmentedButtons
         value={type}
         onValueChange={setType}
-        buttons={LINK_TYPES}
+        buttons={LINK_TYPES.map((t) => ({ ...t }))}
         style={styles.segmented}
       />
 
@@ -82,7 +75,7 @@ export default function AddLinkScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   content: {
     padding: 16,
@@ -93,5 +86,6 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: 8,
+    backgroundColor: COLORS.primary,
   },
 });

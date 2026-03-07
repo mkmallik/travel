@@ -1,12 +1,12 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
-import type { Itinerary } from '../../types/database';
+import type { SQLiteDatabase } from "expo-sqlite";
+import type { ItineraryData } from "../../types/database";
 
 export async function getItinerariesByTravel(
   db: SQLiteDatabase,
   travelId: number
-): Promise<Itinerary[]> {
-  return db.getAllAsync<Itinerary>(
-    'SELECT * FROM itinerary WHERE travel_id = ? ORDER BY day_no ASC',
+): Promise<ItineraryData[]> {
+  return db.getAllAsync<ItineraryData>(
+    "SELECT * FROM itinerary WHERE travel_id = ? ORDER BY day_no ASC",
     [travelId]
   );
 }
@@ -14,9 +14,9 @@ export async function getItinerariesByTravel(
 export async function getItineraryById(
   db: SQLiteDatabase,
   itineraryId: number
-): Promise<Itinerary | null> {
-  return db.getFirstAsync<Itinerary>(
-    'SELECT * FROM itinerary WHERE itinerary_id = ?',
+): Promise<ItineraryData | null> {
+  return db.getFirstAsync<ItineraryData>(
+    "SELECT * FROM itinerary WHERE itinerary_id = ?",
     [itineraryId]
   );
 }
@@ -25,16 +25,16 @@ export async function getItineraryByDate(
   db: SQLiteDatabase,
   travelId: number,
   date: string
-): Promise<Itinerary | null> {
-  return db.getFirstAsync<Itinerary>(
-    'SELECT * FROM itinerary WHERE travel_id = ? AND date = ?',
+): Promise<ItineraryData | null> {
+  return db.getFirstAsync<ItineraryData>(
+    "SELECT * FROM itinerary WHERE travel_id = ? AND date = ?",
     [travelId, date]
   );
 }
 
 export async function insertItinerary(
   db: SQLiteDatabase,
-  itinerary: Omit<Itinerary, 'itinerary_id'>
+  itinerary: Omit<ItineraryData, "itinerary_id">
 ): Promise<number> {
   const result = await db.runAsync(
     `INSERT INTO itinerary (
@@ -70,7 +70,7 @@ export async function insertItinerary(
 
 export async function updateItinerary(
   db: SQLiteDatabase,
-  itinerary: Itinerary
+  itinerary: ItineraryData
 ): Promise<void> {
   await db.runAsync(
     `UPDATE itinerary SET
@@ -108,7 +108,7 @@ export async function deleteItinerary(
   db: SQLiteDatabase,
   itineraryId: number
 ): Promise<void> {
-  await db.runAsync('DELETE FROM itinerary WHERE itinerary_id = ?', [
+  await db.runAsync("DELETE FROM itinerary WHERE itinerary_id = ?", [
     itineraryId,
   ]);
 }

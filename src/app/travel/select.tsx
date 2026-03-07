@@ -1,8 +1,9 @@
-import { View, StyleSheet, FlatList } from 'react-native';
-import { List, Divider, Text } from 'react-native-paper';
-import { useRouter } from 'expo-router';
-import { useCurrentTravel } from '../../hooks/useCurrentTravel';
-import { formatDate } from '../../utils/date';
+import { View, StyleSheet, FlatList } from "react-native";
+import { List, Divider, Text } from "react-native-paper";
+import { useRouter } from "expo-router";
+import { useCurrentTravel } from "../../hooks/useCurrentTravel";
+import { formatDate } from "../../utils/date";
+import { COLORS } from "../../utils/constants";
 
 export default function SelectTravelScreen() {
   const router = useRouter();
@@ -25,26 +26,29 @@ export default function SelectTravelScreen() {
         <FlatList
           data={travels}
           keyExtractor={(item) => String(item.travel_id)}
-          ItemSeparatorComponent={() => <Divider />}
+          ItemSeparatorComponent={() => <Divider style={styles.divider} />}
           renderItem={({ item }) => (
             <List.Item
               title={item.description}
+              titleStyle={styles.itemTitle}
               description={`${formatDate(item.start_date)} - ${formatDate(item.end_date)}${
-                item.countries ? `\n${item.countries}` : ''
+                item.countries ? `\n${item.countries}` : ""
               }`}
+              descriptionStyle={styles.itemDesc}
               descriptionNumberOfLines={2}
+              style={styles.listItem}
               left={(props) => (
                 <List.Icon
                   {...props}
                   icon={
                     currentTravel?.travel_id === item.travel_id
-                      ? 'check-circle'
-                      : 'airplane'
+                      ? "check-circle"
+                      : "airplane"
                   }
                   color={
                     currentTravel?.travel_id === item.travel_id
-                      ? '#1B5E20'
-                      : undefined
+                      ? COLORS.primary
+                      : COLORS.textSecondary
                   }
                 />
               )}
@@ -60,15 +64,27 @@ export default function SelectTravelScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   empty: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 32,
   },
   emptyText: {
-    color: '#757575',
+    color: COLORS.textSecondary,
+  },
+  listItem: {
+    backgroundColor: COLORS.surface,
+  },
+  itemTitle: {
+    color: COLORS.text,
+  },
+  itemDesc: {
+    color: COLORS.textSecondary,
+  },
+  divider: {
+    backgroundColor: COLORS.border,
   },
 });

@@ -1,9 +1,9 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
-import type { Travel } from '../../types/database';
+import type { SQLiteDatabase } from "expo-sqlite";
+import type { TravelData } from "../../types/database";
 
-export async function getAllTravels(db: SQLiteDatabase, userId: number): Promise<Travel[]> {
-  return db.getAllAsync<Travel>(
-    'SELECT * FROM travel WHERE user_id = ? ORDER BY start_date DESC',
+export async function getAllTravels(db: SQLiteDatabase, userId: number): Promise<TravelData[]> {
+  return db.getAllAsync<TravelData>(
+    "SELECT * FROM travel WHERE user_id = ? ORDER BY start_date DESC",
     [userId]
   );
 }
@@ -11,16 +11,16 @@ export async function getAllTravels(db: SQLiteDatabase, userId: number): Promise
 export async function getTravelById(
   db: SQLiteDatabase,
   travelId: number
-): Promise<Travel | null> {
-  return db.getFirstAsync<Travel>(
-    'SELECT * FROM travel WHERE travel_id = ?',
+): Promise<TravelData | null> {
+  return db.getFirstAsync<TravelData>(
+    "SELECT * FROM travel WHERE travel_id = ?",
     [travelId]
   );
 }
 
 export async function insertTravel(
   db: SQLiteDatabase,
-  travel: Omit<Travel, 'travel_id'>
+  travel: Omit<TravelData, "travel_id">
 ): Promise<number> {
   const result = await db.runAsync(
     `INSERT INTO travel (user_id, description, start_date, end_date, countries, cover_image_uri)
@@ -39,7 +39,7 @@ export async function insertTravel(
 
 export async function updateTravel(
   db: SQLiteDatabase,
-  travel: Travel
+  travel: TravelData
 ): Promise<void> {
   await db.runAsync(
     `UPDATE travel SET description = ?, start_date = ?, end_date = ?, countries = ?, cover_image_uri = ?
@@ -59,5 +59,5 @@ export async function deleteTravel(
   db: SQLiteDatabase,
   travelId: number
 ): Promise<void> {
-  await db.runAsync('DELETE FROM travel WHERE travel_id = ?', [travelId]);
+  await db.runAsync("DELETE FROM travel WHERE travel_id = ?", [travelId]);
 }

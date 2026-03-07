@@ -1,7 +1,8 @@
-import { View, StyleSheet } from 'react-native';
-import { TextInput, Text, Menu, Button } from 'react-native-paper';
-import { useState } from 'react';
-import { CURRENCY_CODES } from '../../utils/currency';
+import React, { useState } from "react";
+import { View, StyleSheet } from "react-native";
+import { TextInput, Menu, Button } from "react-native-paper";
+import { CURRENCY_CODES } from "../../utils/currency";
+import { COLORS } from "../../utils/constants";
 
 interface CurrencyInputProps {
   amountEur: string;
@@ -12,14 +13,14 @@ interface CurrencyInputProps {
   onChangeCurrency: (code: string) => void;
 }
 
-export function CurrencyInput({
+const CurrencyInput: React.FC<CurrencyInputProps> = ({
   amountEur,
   onChangeEur,
   amountLocal,
   onChangeLocal,
   localCurrency,
   onChangeCurrency,
-}: CurrencyInputProps) {
+}) => {
   const [menuVisible, setMenuVisible] = useState(false);
 
   return (
@@ -50,8 +51,9 @@ export function CurrencyInput({
               mode="outlined"
               onPress={() => setMenuVisible(true)}
               style={styles.currencyButton}
+              textColor={COLORS.text}
             >
-              {localCurrency || 'Currency'}
+              {localCurrency || "Currency"}
             </Button>
           }
         >
@@ -69,7 +71,7 @@ export function CurrencyInput({
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -77,14 +79,18 @@ const styles = StyleSheet.create({
   },
   eurInput: {},
   localRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   localInput: {
     flex: 1,
   },
   currencyButton: {
     marginTop: 6,
+    borderColor: COLORS.border,
   },
 });
+
+export default CurrencyInput;
+export { CurrencyInput };

@@ -1,18 +1,19 @@
-import { Suspense } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { Stack } from 'expo-router';
-import { SQLiteProvider } from 'expo-sqlite';
-import { PaperProvider, Text } from 'react-native-paper';
-import { StatusBar } from 'expo-status-bar';
-import { theme } from '../constants/theme';
-import { DB_NAME, initDatabase } from '../db/database';
-import { ActiveTravelProvider } from '../hooks/useCurrentTravel';
-import { AuthProvider, useAuth } from '../hooks/useAuth';
+import { Suspense } from "react";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { Stack } from "expo-router";
+import { SQLiteProvider } from "expo-sqlite";
+import { PaperProvider, Text } from "react-native-paper";
+import { StatusBar } from "expo-status-bar";
+import { theme } from "../constants/theme";
+import { COLORS } from "../utils/constants";
+import { DB_NAME, initDatabase } from "../db/database";
+import { ActiveTravelProvider } from "../hooks/useCurrentTravel";
+import { AuthProvider, useAuth } from "../hooks/useAuth";
 
 function Loading() {
   return (
     <View style={styles.loading}>
-      <ActivityIndicator size="large" color="#1B5E20" />
+      <ActivityIndicator size="large" color={COLORS.primary} />
       <Text style={styles.loadingText}>Loading Travel Log...</Text>
     </View>
   );
@@ -31,31 +32,37 @@ function AppNavigator() {
 
   return (
     <ActiveTravelProvider>
-      <Stack>
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: COLORS.surface },
+          headerTintColor: COLORS.text,
+          headerTitleStyle: { color: COLORS.text },
+        }}
+      >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="itinerary/[id]"
-          options={{ title: 'Itinerary Detail' }}
+          options={{ title: "Itinerary Detail" }}
         />
         <Stack.Screen
           name="expense/add"
-          options={{ title: 'Add Expense', presentation: 'modal' }}
+          options={{ title: "Add Expense", presentation: "modal" }}
         />
         <Stack.Screen
           name="expense/[id]"
-          options={{ title: 'Edit Expense' }}
+          options={{ title: "Edit Expense" }}
         />
         <Stack.Screen
           name="travel/add"
-          options={{ title: 'New Trip', presentation: 'modal' }}
+          options={{ title: "New Trip", presentation: "modal" }}
         />
         <Stack.Screen
           name="travel/select"
-          options={{ title: 'Select Trip', presentation: 'modal' }}
+          options={{ title: "Select Trip", presentation: "modal" }}
         />
         <Stack.Screen
           name="link/add"
-          options={{ title: 'Add Link', presentation: 'modal' }}
+          options={{ title: "Add Link", presentation: "modal" }}
         />
       </Stack>
     </ActiveTravelProvider>
@@ -68,7 +75,7 @@ export default function RootLayout() {
       <SQLiteProvider databaseName={DB_NAME} onInit={initDatabase}>
         <PaperProvider theme={theme}>
           <AuthProvider>
-            <StatusBar style="dark" />
+            <StatusBar style="light" />
             <AppNavigator />
           </AuthProvider>
         </PaperProvider>
@@ -80,13 +87,13 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FAFAFA',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: COLORS.background,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#757575',
+    color: COLORS.textSecondary,
   },
 });

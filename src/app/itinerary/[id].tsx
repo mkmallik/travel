@@ -1,32 +1,42 @@
-import { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
-import { TextInput, Button, Text, Divider, IconButton } from 'react-native-paper';
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
-import * as ImagePicker from 'expo-image-picker';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useCurrentTravel } from '../../hooks/useCurrentTravel';
+import { useState, useEffect } from "react";
+import { View, StyleSheet, ScrollView, Image, Pressable } from "react-native";
+import { TextInput, Button, Text, Divider, IconButton } from "react-native-paper";
+import { useLocalSearchParams, useRouter, Stack } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import * as ImagePicker from "expo-image-picker";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useCurrentTravel } from "../../hooks/useCurrentTravel";
 import {
   getItineraryById,
   insertItinerary,
   updateItinerary,
   deleteItinerary,
-} from '../../db/queries/itinerary';
-import { toISODate } from '../../utils/date';
-import { formatEUR } from '../../utils/currency';
-import type { Itinerary } from '../../types/database';
-import dayjs from 'dayjs';
+} from "../../db/queries/itinerary";
+import { toISODate } from "../../utils/date";
+import { formatEUR } from "../../utils/currency";
+import { COLORS } from "../../utils/constants";
+import type { ItineraryData } from "../../types/database";
+import dayjs from "dayjs";
 
-function LabeledField({ label, children }: { label: string; children: React.ReactNode }) {
+interface LabeledFieldProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+const LabeledField: React.FC<LabeledFieldProps> = ({ label, children }) => {
   return (
     <View style={styles.field}>
       <Text variant="labelMedium" style={styles.fieldLabel}>{label}</Text>
       {children}
     </View>
   );
+};
+
+interface ReadOnlySectionProps {
+  itinerary: ItineraryData;
 }
 
-function ReadOnlySection({ itinerary }: { itinerary: Itinerary }) {
+const ReadOnlySection: React.FC<ReadOnlySectionProps> = ({ itinerary }) => {
   const router = useRouter();
   const totalCost =
     (itinerary.transport_cost ?? 0) +
@@ -38,25 +48,22 @@ function ReadOnlySection({ itinerary }: { itinerary: Itinerary }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.readContent}>
-      {/* Hero image */}
       {itinerary.city_image_uri ? (
-        <Pressable onPress={() => router.push({ pathname: '/itinerary/[id]/photo', params: { id: String(itinerary.itinerary_id), uri: itinerary.city_image_uri! } })}>
+        <Pressable onPress={() => router.push({ pathname: "/itinerary/[id]/photo", params: { id: String(itinerary.itinerary_id), uri: itinerary.city_image_uri! } })}>
           <Image source={{ uri: itinerary.city_image_uri }} style={styles.heroImage} />
         </Pressable>
       ) : (
         <View style={styles.heroPlaceholder}>
-          <MaterialCommunityIcons name="image-area" size={64} color="#ccc" />
+          <MaterialCommunityIcons name="image-area" size={64} color={COLORS.border} />
         </View>
       )}
 
-      {/* Destination */}
       <LabeledField label="Destination">
         <Text variant="titleLarge" style={styles.fieldValue}>
-          DAY{itinerary.day_no} - {dayjs(itinerary.date).format('DD-MM-YYYY')} - {itinerary.city}
+          DAY{itinerary.day_no} - {dayjs(itinerary.date).format("DD-MM-YYYY")} - {itinerary.city}
         </Text>
       </LabeledField>
 
-      {/* Activities & Notes */}
       {itinerary.activity_description && (
         <>
           <Divider style={styles.divider} />
@@ -74,7 +81,6 @@ function ReadOnlySection({ itinerary }: { itinerary: Itinerary }) {
         </>
       )}
 
-      {/* Accommodation */}
       {itinerary.hotel_name && (
         <>
           <Divider style={styles.divider} />
@@ -86,7 +92,7 @@ function ReadOnlySection({ itinerary }: { itinerary: Itinerary }) {
             <LabeledField label="Address">
               <View style={styles.addressRow}>
                 <Text variant="bodyLarge" style={[styles.fieldValue, { flex: 1 }]}>{itinerary.hotel_address}</Text>
-                <MaterialCommunityIcons name="map-marker" size={24} color="#999" />
+                <MaterialCommunityIcons name="map-marker" size={24} color={COLORS.textSecondary} />
               </View>
             </LabeledField>
           )}
@@ -99,7 +105,6 @@ function ReadOnlySection({ itinerary }: { itinerary: Itinerary }) {
         </>
       )}
 
-      {/* Travel Details */}
       {(itinerary.flight_detail || itinerary.transport_mode) && (
         <>
           <Divider style={styles.divider} />
@@ -116,7 +121,6 @@ function ReadOnlySection({ itinerary }: { itinerary: Itinerary }) {
         </>
       )}
 
-      {/* Cost breakdown */}
       <Divider style={styles.divider} />
       <LabeledField label="Cost Breakdown">
         <View style={styles.costGrid}>
@@ -167,36 +171,36 @@ function ReadOnlySection({ itinerary }: { itinerary: Itinerary }) {
       )}
     </ScrollView>
   );
-}
+};
 
 export default function ItineraryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useSQLiteContext();
   const router = useRouter();
   const { currentTravel } = useCurrentTravel();
-  const isNew = id === 'new';
+  const isNew = id === "new";
 
   const [editing, setEditing] = useState(isNew);
-  const [itinerary, setItinerary] = useState<Itinerary | null>(null);
+  const [itinerary, setItinerary] = useState<ItineraryData | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     date: toISODate(new Date()),
     day_no: 1,
-    city: '',
+    city: "",
     city_image_uri: null as string | null,
-    flight_detail: '',
-    transport_mode: '',
-    transport_cost: '',
-    hotel_name: '',
-    hotel_address: '',
-    booking_id: '',
-    hotel_cost: '',
-    food_cost: '',
-    transportation_cost: '',
-    activities_cost: '',
-    misc_cost: '',
-    activity_description: '',
-    notes: '',
+    flight_detail: "",
+    transport_mode: "",
+    transport_cost: "",
+    hotel_name: "",
+    hotel_address: "",
+    booking_id: "",
+    hotel_cost: "",
+    food_cost: "",
+    transportation_cost: "",
+    activities_cost: "",
+    misc_cost: "",
+    activity_description: "",
+    notes: "",
   });
 
   useEffect(() => {
@@ -209,19 +213,19 @@ export default function ItineraryDetailScreen() {
             day_no: it.day_no,
             city: it.city,
             city_image_uri: it.city_image_uri,
-            flight_detail: it.flight_detail ?? '',
-            transport_mode: it.transport_mode ?? '',
-            transport_cost: it.transport_cost?.toString() ?? '',
-            hotel_name: it.hotel_name ?? '',
-            hotel_address: it.hotel_address ?? '',
-            booking_id: it.booking_id ?? '',
-            hotel_cost: it.hotel_cost?.toString() ?? '',
-            food_cost: it.food_cost?.toString() ?? '',
-            transportation_cost: it.transportation_cost?.toString() ?? '',
-            activities_cost: it.activities_cost?.toString() ?? '',
-            misc_cost: it.misc_cost?.toString() ?? '',
-            activity_description: it.activity_description ?? '',
-            notes: it.notes ?? '',
+            flight_detail: it.flight_detail ?? "",
+            transport_mode: it.transport_mode ?? "",
+            transport_cost: it.transport_cost?.toString() ?? "",
+            hotel_name: it.hotel_name ?? "",
+            hotel_address: it.hotel_address ?? "",
+            booking_id: it.booking_id ?? "",
+            hotel_cost: it.hotel_cost?.toString() ?? "",
+            food_cost: it.food_cost?.toString() ?? "",
+            transportation_cost: it.transportation_cost?.toString() ?? "",
+            activities_cost: it.activities_cost?.toString() ?? "",
+            misc_cost: it.misc_cost?.toString() ?? "",
+            activity_description: it.activity_description ?? "",
+            notes: it.notes ?? "",
           });
         }
       });
@@ -230,7 +234,7 @@ export default function ItineraryDetailScreen() {
 
   const pickCityImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       quality: 0.8,
     });
     if (!result.canceled && result.assets[0]) {
@@ -242,7 +246,7 @@ export default function ItineraryDetailScreen() {
     if (!form.city.trim() || !currentTravel) return;
     setSaving(true);
     try {
-      const data: Omit<Itinerary, 'itinerary_id'> = {
+      const data: Omit<ItineraryData, "itinerary_id"> = {
         travel_id: currentTravel.travel_id,
         date: form.date,
         day_no: form.day_no,
@@ -287,7 +291,6 @@ export default function ItineraryDetailScreen() {
     }
   };
 
-  // Read-only view for existing itineraries
   if (!editing && itinerary) {
     return (
       <>
@@ -295,9 +298,9 @@ export default function ItineraryDetailScreen() {
           options={{
             title: `Day ${itinerary.day_no} - ${itinerary.city}`,
             headerRight: () => (
-              <View style={{ flexDirection: 'row' }}>
-                <IconButton icon="pencil" onPress={() => setEditing(true)} />
-                <IconButton icon="delete" onPress={handleDelete} />
+              <View style={{ flexDirection: "row" }}>
+                <IconButton icon="pencil" iconColor={COLORS.text} onPress={() => setEditing(true)} />
+                <IconButton icon="delete" iconColor={COLORS.error} onPress={handleDelete} />
               </View>
             ),
           }}
@@ -307,7 +310,6 @@ export default function ItineraryDetailScreen() {
     );
   }
 
-  // Edit / New form
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.editContent}>
       {form.city_image_uri ? (
@@ -315,7 +317,7 @@ export default function ItineraryDetailScreen() {
           <Image source={{ uri: form.city_image_uri }} style={styles.heroImage} />
         </Pressable>
       ) : (
-        <Button mode="outlined" icon="camera" onPress={pickCityImage} style={styles.imageButton}>
+        <Button mode="outlined" icon="camera" onPress={pickCityImage} style={styles.imageButton} textColor={COLORS.text}>
           Add City Photo
         </Button>
       )}
@@ -347,10 +349,10 @@ export default function ItineraryDetailScreen() {
       <TextInput label="Notes" value={form.notes} onChangeText={(v) => setForm((f) => ({ ...f, notes: v }))} mode="outlined" multiline numberOfLines={3} style={styles.input} />
 
       <Button mode="contained" onPress={handleSave} loading={saving} disabled={saving || !form.city.trim()} style={styles.saveButton}>
-        {isNew ? 'Add Day' : 'Save Changes'}
+        {isNew ? "Add Day" : "Save Changes"}
       </Button>
       {!isNew && (
-        <Button mode="text" onPress={() => setEditing(false)} style={styles.cancelButton}>
+        <Button mode="text" onPress={() => setEditing(false)} style={styles.cancelButton} textColor={COLORS.textSecondary}>
           Cancel
         </Button>
       )}
@@ -361,7 +363,7 @@ export default function ItineraryDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   readContent: {
     paddingBottom: 40,
@@ -371,76 +373,79 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   heroImage: {
-    width: '100%',
+    width: "100%",
     height: 240,
   },
   heroPlaceholder: {
-    width: '100%',
+    width: "100%",
     height: 240,
-    backgroundColor: '#E0E0E0',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: COLORS.surfaceLight,
+    justifyContent: "center",
+    alignItems: "center",
   },
   field: {
     paddingHorizontal: 20,
     paddingVertical: 8,
   },
   fieldLabel: {
-    color: '#1976D2',
+    color: COLORS.primary,
     fontSize: 13,
     marginBottom: 4,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   fieldValue: {
-    color: '#222',
+    color: COLORS.text,
   },
   addressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   divider: {
     marginHorizontal: 20,
     marginVertical: 4,
+    backgroundColor: COLORS.border,
   },
   costGrid: {
     gap: 6,
   },
   costRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   costLabel: {
-    color: '#1976D2',
+    color: COLORS.primary,
     fontSize: 13,
   },
   costValue: {
-    color: '#222',
-    fontWeight: '500',
+    color: COLORS.text,
+    fontWeight: "500",
   },
   totalBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 14,
     marginTop: 8,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: COLORS.primary + "20",
   },
   totalLabel: {
-    fontWeight: '600',
+    fontWeight: "600",
+    color: COLORS.text,
   },
   totalAmount: {
-    color: '#1B5E20',
-    fontWeight: '700',
+    color: COLORS.primary,
+    fontWeight: "700",
   },
   imageButton: {
     marginBottom: 16,
+    borderColor: COLORS.border,
   },
   sectionTitle: {
-    fontWeight: '700',
-    color: '#1976D2',
+    fontWeight: "700",
+    color: COLORS.primary,
     marginTop: 20,
     marginBottom: 8,
   },
@@ -449,6 +454,7 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: 20,
+    backgroundColor: COLORS.primary,
   },
   cancelButton: {
     marginTop: 8,

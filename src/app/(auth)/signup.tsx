@@ -1,40 +1,41 @@
-import { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Text, HelperText } from 'react-native-paper';
-import { useRouter } from 'expo-router';
-import { useAuth } from '../../hooks/useAuth';
+import { useState } from "react";
+import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import { TextInput, Button, Text, HelperText } from "react-native-paper";
+import { useRouter } from "expo-router";
+import { useAuth } from "../../hooks/useAuth";
+import { COLORS } from "../../utils/constants";
 
 export default function SignupScreen() {
   const router = useRouter();
   const { signup } = useAuth();
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [secureText, setSecureText] = useState(true);
 
   const handleSignup = async () => {
-    setError('');
+    setError("");
     if (!email.trim() || !password) {
-      setError('Email and password are required');
+      setError("Email and password are required");
       return;
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError("Password must be at least 6 characters");
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
     setLoading(true);
     try {
       await signup(email.trim(), password, name.trim() || undefined);
     } catch (e: any) {
-      setError(e.message || 'Signup failed');
+      setError(e.message || "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -43,7 +44,7 @@ export default function SignupScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.content}>
         <View style={styles.header}>
@@ -83,7 +84,7 @@ export default function SignupScreen() {
           secureTextEntry={secureText}
           right={
             <TextInput.Icon
-              icon={secureText ? 'eye-off' : 'eye'}
+              icon={secureText ? "eye-off" : "eye"}
               onPress={() => setSecureText(!secureText)}
             />
           }
@@ -119,6 +120,7 @@ export default function SignupScreen() {
           mode="text"
           onPress={() => router.back()}
           style={styles.link}
+          textColor={COLORS.primary}
         >
           Already have an account? Login
         </Button>
@@ -130,23 +132,23 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 24,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 32,
   },
   title: {
-    color: '#1B5E20',
-    fontWeight: 'bold',
+    color: COLORS.primary,
+    fontWeight: "bold",
   },
   subtitle: {
-    color: '#757575',
+    color: COLORS.textSecondary,
     marginTop: 4,
   },
   input: {
@@ -155,6 +157,7 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 8,
     paddingVertical: 4,
+    backgroundColor: COLORS.primary,
   },
   link: {
     marginTop: 12,

@@ -1,8 +1,9 @@
-import { useRef, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
-import dayjs from 'dayjs';
-import { getDaysBetween, isToday } from '../../utils/date';
+import React, { useRef, useEffect } from "react";
+import { View, StyleSheet, ScrollView, Pressable } from "react-native";
+import { Text } from "react-native-paper";
+import dayjs from "dayjs";
+import { getDaysBetween, isToday } from "../../utils/date";
+import { COLORS } from "../../utils/constants";
 
 interface DateSelectorProps {
   startDate: string;
@@ -11,13 +12,12 @@ interface DateSelectorProps {
   onSelectDate: (date: string) => void;
 }
 
-export function DateSelector({
+const DateSelector: React.FC<DateSelectorProps> = ({
   startDate,
   endDate,
   selectedDate,
   onSelectDate,
-}: DateSelectorProps) {
-  const theme = useTheme();
+}) => {
   const days = getDaysBetween(startDate, endDate);
   const scrollRef = useRef<ScrollView>(null);
   const selectedIdx = days.indexOf(selectedDate);
@@ -38,7 +38,7 @@ export function DateSelector({
       style={styles.scroll}
       contentContainerStyle={styles.container}
     >
-      {days.map((date, idx) => {
+      {days.map((date) => {
         const selected = date === selectedDate;
         const today = isToday(date);
         const d = dayjs(date);
@@ -48,22 +48,22 @@ export function DateSelector({
             onPress={() => onSelectDate(date)}
             style={[
               styles.chip,
-              selected && { backgroundColor: theme.colors.primary },
-              today && !selected && { borderColor: theme.colors.primary, borderWidth: 1.5 },
+              selected && styles.selectedChip,
+              today && !selected && styles.todayChip,
             ]}
           >
             <Text style={[styles.dayName, selected && styles.selectedText]}>
-              {d.format('dd')}
+              {d.format("dd")}
             </Text>
             <Text style={[styles.dayNum, selected && styles.selectedText]}>
-              {d.format('D')}
+              {d.format("D")}
             </Text>
           </Pressable>
         );
       })}
     </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   scroll: {
@@ -76,28 +76,37 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   chip: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F0F0F0',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.surfaceLight,
     borderRadius: 10,
     width: 46,
     height: 50,
     borderWidth: 1.5,
-    borderColor: 'transparent',
+    borderColor: "transparent",
+  },
+  selectedChip: {
+    backgroundColor: COLORS.primary,
+  },
+  todayChip: {
+    borderColor: COLORS.primary,
   },
   dayName: {
     fontSize: 10,
-    color: '#999',
-    fontWeight: '500',
-    textTransform: 'uppercase',
+    color: COLORS.textSecondary,
+    fontWeight: "500",
+    textTransform: "uppercase",
   },
   dayNum: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
+    fontWeight: "700",
+    color: COLORS.text,
     marginTop: 1,
   },
   selectedText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
 });
+
+export default DateSelector;
+export { DateSelector };

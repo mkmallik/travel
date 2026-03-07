@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { useSQLiteContext } from 'expo-sqlite';
-import type { Travel } from '../types/database';
-import { getAllTravels, getTravelById } from '../db/queries/travel';
-import { useAuth } from './useAuth';
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { useSQLiteContext } from "expo-sqlite";
+import type { TravelData } from "../types/database";
+import { getAllTravels, getTravelById } from "../db/queries/travel";
+import { useAuth } from "./useAuth";
 
 interface TravelContextValue {
-  currentTravel: Travel | null;
-  travels: Travel[];
+  currentTravel: TravelData | null;
+  travels: TravelData[];
   setCurrentTravelId: (id: number) => void;
   refreshTravels: () => Promise<void>;
 }
@@ -21,8 +21,8 @@ const TravelContext = createContext<TravelContextValue>({
 export function ActiveTravelProvider({ children }: { children: React.ReactNode }) {
   const db = useSQLiteContext();
   const { user } = useAuth();
-  const [travels, setTravels] = useState<Travel[]>([]);
-  const [currentTravel, setCurrentTravel] = useState<Travel | null>(null);
+  const [travels, setTravels] = useState<TravelData[]>([]);
+  const [currentTravel, setCurrentTravel] = useState<TravelData | null>(null);
 
   const refreshTravels = useCallback(async () => {
     if (!user) return;

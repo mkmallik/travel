@@ -1,23 +1,24 @@
-import { useState, useCallback } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import { useFocusEffect } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
-import { Card, Text, Divider } from 'react-native-paper';
-import { useCurrentTravel } from '../../hooks/useCurrentTravel';
+import { useState, useCallback } from "react";
+import { View, FlatList, StyleSheet } from "react-native";
+import { useFocusEffect } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { Card, Text, Divider } from "react-native-paper";
+import { useCurrentTravel } from "../../hooks/useCurrentTravel";
 import {
   getDailyTotals,
   getTotalExpenses,
-  type DailyTotal,
-} from '../../db/queries/expense';
-import { TravelSelector } from '../../components/common/TravelSelector';
-import { EmptyState } from '../../components/common/EmptyState';
-import { formatEUR } from '../../utils/currency';
-import { formatDate } from '../../utils/date';
+} from "../../db/queries/expense";
+import { TravelSelector } from "../../components/common/TravelSelector";
+import { EmptyState } from "../../components/common/EmptyState";
+import { formatEUR } from "../../utils/currency";
+import { formatDate } from "../../utils/date";
+import { COLORS } from "../../utils/constants";
+import type { DailyTotalData } from "../../types/database";
 
 export default function DailyTotalsTab() {
   const db = useSQLiteContext();
   const { currentTravel } = useCurrentTravel();
-  const [dailyTotals, setDailyTotals] = useState<DailyTotal[]>([]);
+  const [dailyTotals, setDailyTotals] = useState<DailyTotalData[]>([]);
   const [grandTotal, setGrandTotal] = useState(0);
 
   useFocusEffect(
@@ -39,7 +40,7 @@ export default function DailyTotalsTab() {
       <TravelSelector />
       {grandTotal > 0 && (
         <View style={styles.grandTotalBar}>
-          <Text variant="titleMedium">Trip Total</Text>
+          <Text variant="titleMedium" style={styles.grandTotalLabel}>Trip Total</Text>
           <Text variant="headlineSmall" style={styles.grandTotalAmount}>
             {formatEUR(grandTotal)}
           </Text>
@@ -55,16 +56,16 @@ export default function DailyTotalsTab() {
         <FlatList
           data={dailyTotals}
           keyExtractor={(item) => item.date}
-          ItemSeparatorComponent={() => <Divider />}
+          ItemSeparatorComponent={() => <Divider style={styles.divider} />}
           renderItem={({ item }) => {
             runningTotal += item.total_eur;
             return (
               <Card style={styles.card}>
                 <Card.Content style={styles.cardContent}>
                   <View style={styles.dateSection}>
-                    <Text variant="titleSmall">{formatDate(item.date)}</Text>
+                    <Text variant="titleSmall" style={styles.dateText}>{formatDate(item.date)}</Text>
                     <Text variant="bodySmall" style={styles.countText}>
-                      {item.count} expense{item.count !== 1 ? 's' : ''}
+                      {item.count} expense{item.count !== 1 ? "s" : ""}
                     </Text>
                   </View>
                   <View style={styles.amountSection}>
@@ -88,43 +89,58 @@ export default function DailyTotalsTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   grandTotalBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: COLORS.primary + "20",
+  },
+  grandTotalLabel: {
+    color: COLORS.text,
   },
   grandTotalAmount: {
-    color: '#1B5E20',
-    fontWeight: '700',
+    color: COLORS.primary,
+    fontWeight: "700",
   },
   card: {
     marginHorizontal: 12,
     marginVertical: 4,
+    backgroundColor: COLORS.surface,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
   },
   cardContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   dateSection: {},
+  dateText: {
+    color: COLORS.text,
+  },
   countText: {
-    color: '#757575',
+    color: COLORS.textSecondary,
     marginTop: 2,
   },
   amountSection: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   dayAmount: {
-    color: '#1B5E20',
-    fontWeight: '600',
+    color: COLORS.primary,
+    fontWeight: "600",
   },
   runningTotal: {
-    color: '#9E9E9E',
+    color: COLORS.textSecondary,
     marginTop: 2,
+  },
+  divider: {
+    backgroundColor: COLORS.border,
   },
 });

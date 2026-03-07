@@ -1,25 +1,24 @@
-import { useState, useCallback } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import { useFocusEffect } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
-import { Card, Text, Divider } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useCurrentTravel } from '../../hooks/useCurrentTravel';
+import { useState, useCallback } from "react";
+import { View, FlatList, StyleSheet } from "react-native";
+import { useFocusEffect } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { Card, Text, Divider } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useCurrentTravel } from "../../hooks/useCurrentTravel";
 import {
   getCategoryTotals,
   getTotalExpenses,
-  type CategoryTotal,
-} from '../../db/queries/expense';
-import { TravelSelector } from '../../components/common/TravelSelector';
-import { EmptyState } from '../../components/common/EmptyState';
-import { formatEUR } from '../../utils/currency';
-import { getCategoryLabel, getCategoryIcon } from '../../utils/categories';
-import { CATEGORY_COLORS } from '../../constants/theme';
+} from "../../db/queries/expense";
+import { TravelSelector } from "../../components/common/TravelSelector";
+import { EmptyState } from "../../components/common/EmptyState";
+import { formatEUR } from "../../utils/currency";
+import { getCategoryLabel, getCategoryIcon, COLORS, CATEGORY_COLORS } from "../../utils/constants";
+import type { CategoryTotalData } from "../../types/database";
 
 export default function CategoryTotalsTab() {
   const db = useSQLiteContext();
   const { currentTravel } = useCurrentTravel();
-  const [categories, setCategories] = useState<CategoryTotal[]>([]);
+  const [categories, setCategories] = useState<CategoryTotalData[]>([]);
   const [grandTotal, setGrandTotal] = useState(0);
 
   useFocusEffect(
@@ -39,7 +38,7 @@ export default function CategoryTotalsTab() {
       <TravelSelector />
       {grandTotal > 0 && (
         <View style={styles.grandTotalBar}>
-          <Text variant="titleMedium">Trip Total</Text>
+          <Text variant="titleMedium" style={styles.grandTotalLabel}>Trip Total</Text>
           <Text variant="headlineSmall" style={styles.grandTotalAmount}>
             {formatEUR(grandTotal)}
           </Text>
@@ -55,11 +54,11 @@ export default function CategoryTotalsTab() {
         <FlatList
           data={categories}
           keyExtractor={(item) => item.category}
-          ItemSeparatorComponent={() => <Divider />}
+          ItemSeparatorComponent={() => <Divider style={styles.divider} />}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => {
             const pct = grandTotal > 0 ? (item.total_eur / grandTotal) * 100 : 0;
-            const color = CATEGORY_COLORS[item.category] ?? '#9E9E9E';
+            const color = CATEGORY_COLORS[item.category] ?? COLORS.others;
             return (
               <Card style={styles.card}>
                 <Card.Content>
@@ -70,11 +69,11 @@ export default function CategoryTotalsTab() {
                       color={color}
                     />
                     <View style={styles.info}>
-                      <Text variant="titleSmall">
+                      <Text variant="titleSmall" style={styles.categoryName}>
                         {getCategoryLabel(item.category)}
                       </Text>
                       <Text variant="bodySmall" style={styles.countText}>
-                        {item.count} expense{item.count !== 1 ? 's' : ''}
+                        {item.count} expense{item.count !== 1 ? "s" : ""}
                       </Text>
                     </View>
                     <View style={styles.amountSection}>
@@ -107,52 +106,67 @@ export default function CategoryTotalsTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   grandTotalBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: COLORS.primary + "20",
+  },
+  grandTotalLabel: {
+    color: COLORS.text,
   },
   grandTotalAmount: {
-    color: '#1B5E20',
-    fontWeight: '700',
+    color: COLORS.primary,
+    fontWeight: "700",
   },
   list: {
     padding: 8,
   },
   card: {
     marginVertical: 4,
+    backgroundColor: COLORS.surface,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   info: {
     flex: 1,
   },
+  categoryName: {
+    color: COLORS.text,
+  },
   countText: {
-    color: '#757575',
+    color: COLORS.textSecondary,
   },
   amountSection: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   pctText: {
-    color: '#9E9E9E',
+    color: COLORS.textSecondary,
   },
   barBg: {
     height: 6,
-    backgroundColor: '#EEEEEE',
+    backgroundColor: COLORS.surfaceLight,
     borderRadius: 3,
     marginTop: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   barFill: {
     height: 6,
     borderRadius: 3,
+  },
+  divider: {
+    backgroundColor: COLORS.border,
   },
 });

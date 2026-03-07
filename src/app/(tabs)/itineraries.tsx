@@ -1,23 +1,24 @@
-import { useState, useCallback } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
-import { IconButton } from 'react-native-paper';
-import { useCurrentTravel } from '../../hooks/useCurrentTravel';
-import { getItinerariesByTravel } from '../../db/queries/itinerary';
-import { CityCard } from '../../components/itinerary/CityCard';
-import { CityListItem } from '../../components/itinerary/CityListItem';
-import { TravelSelector } from '../../components/common/TravelSelector';
-import { EmptyState } from '../../components/common/EmptyState';
-import { FAB } from '../../components/common/FAB';
-import type { Itinerary } from '../../types/database';
+import { useState, useCallback } from "react";
+import { View, FlatList, StyleSheet } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { IconButton } from "react-native-paper";
+import { useCurrentTravel } from "../../hooks/useCurrentTravel";
+import { getItinerariesByTravel } from "../../db/queries/itinerary";
+import { CityCard } from "../../components/itinerary/CityCard";
+import { CityListItem } from "../../components/itinerary/CityListItem";
+import { TravelSelector } from "../../components/common/TravelSelector";
+import { EmptyState } from "../../components/common/EmptyState";
+import { FAB } from "../../components/common/FAB";
+import { COLORS } from "../../utils/constants";
+import type { ItineraryData } from "../../types/database";
 
 export default function ItinerariesTab() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { currentTravel } = useCurrentTravel();
-  const [itineraries, setItineraries] = useState<Itinerary[]>([]);
-  const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
+  const [itineraries, setItineraries] = useState<ItineraryData[]>([]);
+  const [viewMode, setViewMode] = useState<"list" | "card">("list");
 
   useFocusEffect(
     useCallback(() => {
@@ -43,9 +44,10 @@ export default function ItinerariesTab() {
         </View>
         {itineraries.length > 0 && (
           <IconButton
-            icon={viewMode === 'list' ? 'view-grid' : 'view-list'}
+            icon={viewMode === "list" ? "view-grid" : "view-list"}
             size={22}
-            onPress={() => setViewMode(viewMode === 'list' ? 'card' : 'list')}
+            iconColor={COLORS.textSecondary}
+            onPress={() => setViewMode(viewMode === "list" ? "card" : "list")}
             style={styles.toggleButton}
           />
         )}
@@ -57,8 +59,8 @@ export default function ItinerariesTab() {
           title="No Itineraries Yet"
           subtitle={
             currentTravel
-              ? 'Add your first day to start planning'
-              : 'Create a trip first'
+              ? "Add your first day to start planning"
+              : "Create a trip first"
           }
         />
       ) : (
@@ -66,7 +68,7 @@ export default function ItinerariesTab() {
           data={itineraries}
           keyExtractor={(item) => String(item.itinerary_id)}
           renderItem={({ item }) =>
-            viewMode === 'list' ? (
+            viewMode === "list" ? (
               <CityListItem
                 itinerary={item}
                 onPress={() => navigateToDetail(item.itinerary_id)}
@@ -86,8 +88,8 @@ export default function ItinerariesTab() {
           icon="plus"
           onPress={() =>
             router.push({
-              pathname: '/itinerary/[id]',
-              params: { id: 'new' },
+              pathname: "/itinerary/[id]",
+              params: { id: "new" },
             })
           }
         />
@@ -99,11 +101,11 @@ export default function ItinerariesTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   selectorWrap: {
     flex: 1,

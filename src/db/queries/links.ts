@@ -1,37 +1,37 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
-import type { ImportantLink } from '../../types/database';
+import type { SQLiteDatabase } from "expo-sqlite";
+import type { LinkData } from "../../types/database";
 
 export async function getLinksByTravel(
   db: SQLiteDatabase,
   travelId: number
-): Promise<ImportantLink[]> {
-  return db.getAllAsync<ImportantLink>(
-    'SELECT * FROM important_links WHERE travel_id = ? ORDER BY type ASC, title ASC',
+): Promise<LinkData[]> {
+  return db.getAllAsync<LinkData>(
+    "SELECT * FROM important_links WHERE travel_id = ? ORDER BY type ASC, title ASC",
     [travelId]
   );
 }
 
 export async function getAllLinks(
   db: SQLiteDatabase
-): Promise<ImportantLink[]> {
-  return db.getAllAsync<ImportantLink>(
-    'SELECT * FROM important_links ORDER BY type ASC, title ASC'
+): Promise<LinkData[]> {
+  return db.getAllAsync<LinkData>(
+    "SELECT * FROM important_links ORDER BY type ASC, title ASC"
   );
 }
 
 export async function getLinkById(
   db: SQLiteDatabase,
   linkId: number
-): Promise<ImportantLink | null> {
-  return db.getFirstAsync<ImportantLink>(
-    'SELECT * FROM important_links WHERE link_id = ?',
+): Promise<LinkData | null> {
+  return db.getFirstAsync<LinkData>(
+    "SELECT * FROM important_links WHERE link_id = ?",
     [linkId]
   );
 }
 
 export async function insertLink(
   db: SQLiteDatabase,
-  link: Omit<ImportantLink, 'link_id'>
+  link: Omit<LinkData, "link_id">
 ): Promise<number> {
   const result = await db.runAsync(
     `INSERT INTO important_links (travel_id, type, title, url, icon_url)
@@ -43,7 +43,7 @@ export async function insertLink(
 
 export async function updateLink(
   db: SQLiteDatabase,
-  link: ImportantLink
+  link: LinkData
 ): Promise<void> {
   await db.runAsync(
     `UPDATE important_links SET travel_id = ?, type = ?, title = ?, url = ?, icon_url = ?
@@ -56,5 +56,5 @@ export async function deleteLink(
   db: SQLiteDatabase,
   linkId: number
 ): Promise<void> {
-  await db.runAsync('DELETE FROM important_links WHERE link_id = ?', [linkId]);
+  await db.runAsync("DELETE FROM important_links WHERE link_id = ?", [linkId]);
 }

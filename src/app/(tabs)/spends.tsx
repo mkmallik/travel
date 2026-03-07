@@ -1,26 +1,31 @@
-import { useState, useCallback } from 'react';
-import { View, FlatList, StyleSheet, Pressable, Image } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
-import { Text, IconButton, Divider, useTheme } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useCurrentTravel } from '../../hooks/useCurrentTravel';
-import { getExpensesByDate, deleteExpense } from '../../db/queries/expense';
-import { DateSelector } from '../../components/common/DateSelector';
-import { TravelSelector } from '../../components/common/TravelSelector';
-import { EmptyState } from '../../components/common/EmptyState';
-import { FAB } from '../../components/common/FAB';
-import { formatEUR, formatLocal } from '../../utils/currency';
-import { getCategoryLabel, getCategoryIcon } from '../../utils/categories';
-import { toISODate, formatDate } from '../../utils/date';
-import { CATEGORY_COLORS } from '../../constants/theme';
-import type { Expense } from '../../types/database';
+import { useState, useCallback } from "react";
+import { View, FlatList, StyleSheet, Pressable, Image } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { Text, IconButton, Divider } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useCurrentTravel } from "../../hooks/useCurrentTravel";
+import { getExpensesByDate, deleteExpense } from "../../db/queries/expense";
+import { DateSelector } from "../../components/common/DateSelector";
+import { TravelSelector } from "../../components/common/TravelSelector";
+import { EmptyState } from "../../components/common/EmptyState";
+import { FAB } from "../../components/common/FAB";
+import { formatEUR, formatLocal } from "../../utils/currency";
+import { getCategoryLabel, getCategoryIcon, COLORS, CATEGORY_COLORS } from "../../utils/constants";
+import { toISODate, formatDate } from "../../utils/date";
+import type { ExpenseData } from "../../types/database";
 
-function ExpenseRow({ item, onPress, onDelete }: { item: Expense; onPress: () => void; onDelete: () => void }) {
-  const color = CATEGORY_COLORS[item.category] ?? '#9E9E9E';
+interface ExpenseRowProps {
+  item: ExpenseData;
+  onPress: () => void;
+  onDelete: () => void;
+}
+
+const ExpenseRow: React.FC<ExpenseRowProps> = ({ item, onPress, onDelete }) => {
+  const color = CATEGORY_COLORS[item.category] ?? COLORS.others;
   return (
     <Pressable onPress={onPress} style={styles.expenseRow}>
-      <View style={[styles.catIcon, { backgroundColor: color + '18' }]}>
+      <View style={[styles.catIcon, { backgroundColor: color + "18" }]}>
         <MaterialCommunityIcons
           name={getCategoryIcon(item.category) as any}
           size={20}
@@ -35,7 +40,7 @@ function ExpenseRow({ item, onPress, onDelete }: { item: Expense; onPress: () =>
           {getCategoryLabel(item.category)}
           {item.amount_local != null && item.local_currency_code
             ? ` · ${formatLocal(item.amount_local, item.local_currency_code)}`
-            : ''}
+            : ""}
         </Text>
       </View>
       <Text variant="titleSmall" style={styles.expenseAmount}>
@@ -47,20 +52,20 @@ function ExpenseRow({ item, onPress, onDelete }: { item: Expense; onPress: () =>
       <IconButton
         icon="close"
         size={16}
-        iconColor="#bbb"
+        iconColor={COLORS.textSecondary}
         onPress={onDelete}
         style={styles.deleteBtn}
       />
     </Pressable>
   );
-}
+};
 
 export default function SpendsTab() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { currentTravel } = useCurrentTravel();
   const [selectedDate, setSelectedDate] = useState(toISODate(new Date()));
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseData[]>([]);
 
   const loadExpenses = useCallback(async () => {
     if (currentTravel) {
@@ -97,7 +102,6 @@ export default function SpendsTab() {
         />
       )}
 
-      {/* Day header bar */}
       {currentTravel && (
         <View style={styles.dayHeader}>
           <Text variant="titleSmall" style={styles.dayHeaderDate}>
@@ -117,8 +121,8 @@ export default function SpendsTab() {
           title="No Expenses"
           subtitle={
             currentTravel
-              ? 'Tap + to add an expense for this day'
-              : 'Create a trip first'
+              ? "Tap + to add an expense for this day"
+              : "Create a trip first"
           }
         />
       ) : (
@@ -142,7 +146,7 @@ export default function SpendsTab() {
           icon="plus"
           onPress={() =>
             router.push({
-              pathname: '/expense/add',
+              pathname: "/expense/add",
               params: { date: selectedDate },
             })
           }
@@ -155,60 +159,60 @@ export default function SpendsTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   dayHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: COLORS.primary + "20",
     borderBottomWidth: 1,
-    borderBottomColor: '#C8E6C9',
+    borderBottomColor: COLORS.border,
   },
   dayHeaderDate: {
-    color: '#333',
+    color: COLORS.text,
   },
   dayHeaderTotal: {
-    color: '#1B5E20',
-    fontWeight: '700',
+    color: COLORS.primary,
+    fontWeight: "700",
   },
   listContent: {
     paddingBottom: 80,
   },
   expenseRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 14,
     paddingVertical: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     gap: 10,
   },
   catIcon: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   expenseInfo: {
     flex: 1,
     minWidth: 0,
   },
   expenseDesc: {
-    fontWeight: '500',
-    color: '#222',
+    fontWeight: "500",
+    color: COLORS.text,
   },
   expenseCat: {
-    color: '#999',
+    color: COLORS.textSecondary,
     marginTop: 1,
   },
   expenseAmount: {
-    color: '#1B5E20',
-    fontWeight: '700',
+    color: COLORS.primary,
+    fontWeight: "700",
     minWidth: 60,
-    textAlign: 'right',
+    textAlign: "right",
   },
   receiptThumb: {
     width: 28,
@@ -220,5 +224,6 @@ const styles = StyleSheet.create({
   },
   separator: {
     marginLeft: 60,
+    backgroundColor: COLORS.border,
   },
 });

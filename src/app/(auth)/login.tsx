@@ -1,30 +1,31 @@
-import { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Text, HelperText } from 'react-native-paper';
-import { useRouter } from 'expo-router';
-import { useAuth } from '../../hooks/useAuth';
+import { useState } from "react";
+import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import { TextInput, Button, Text, HelperText } from "react-native-paper";
+import { useRouter } from "expo-router";
+import { useAuth } from "../../hooks/useAuth";
+import { COLORS } from "../../utils/constants";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [secureText, setSecureText] = useState(true);
 
   const handleLogin = async () => {
-    setError('');
+    setError("");
     if (!email.trim() || !password) {
-      setError('Please enter both email and password');
+      setError("Please enter both email and password");
       return;
     }
     setLoading(true);
     try {
       await login(email.trim(), password);
     } catch (e: any) {
-      setError(e.message || 'Login failed');
+      setError(e.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -33,7 +34,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.content}>
         <View style={styles.header}>
@@ -64,7 +65,7 @@ export default function LoginScreen() {
           secureTextEntry={secureText}
           right={
             <TextInput.Icon
-              icon={secureText ? 'eye-off' : 'eye'}
+              icon={secureText ? "eye-off" : "eye"}
               onPress={() => setSecureText(!secureText)}
             />
           }
@@ -89,8 +90,9 @@ export default function LoginScreen() {
 
         <Button
           mode="text"
-          onPress={() => router.push('/(auth)/signup')}
+          onPress={() => router.push("/(auth)/signup")}
           style={styles.link}
+          textColor={COLORS.primary}
         >
           Don't have an account? Sign up
         </Button>
@@ -102,23 +104,23 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 24,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 32,
   },
   title: {
-    color: '#1B5E20',
-    fontWeight: 'bold',
+    color: COLORS.primary,
+    fontWeight: "bold",
   },
   subtitle: {
-    color: '#757575',
+    color: COLORS.textSecondary,
     marginTop: 4,
   },
   input: {
@@ -127,6 +129,7 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 8,
     paddingVertical: 4,
+    backgroundColor: COLORS.primary,
   },
   link: {
     marginTop: 12,

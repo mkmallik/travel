@@ -1,29 +1,30 @@
-import { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Image } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
-import * as ImagePicker from 'expo-image-picker';
+import { useState, useEffect } from "react";
+import { View, StyleSheet, ScrollView, Image } from "react-native";
+import { TextInput, Button } from "react-native-paper";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import * as ImagePicker from "expo-image-picker";
 import {
   getExpenseById,
   updateExpense,
   deleteExpense,
-} from '../../db/queries/expense';
-import { CategoryPicker } from '../../components/expense/CategoryPicker';
-import { CurrencyInput } from '../../components/expense/CurrencyInput';
-import { VoiceInput } from '../../components/expense/VoiceInput';
+} from "../../db/queries/expense";
+import { CategoryPicker } from "../../components/expense/CategoryPicker";
+import { CurrencyInput } from "../../components/expense/CurrencyInput";
+import { VoiceInput } from "../../components/expense/VoiceInput";
+import { COLORS } from "../../utils/constants";
 
 export default function EditExpenseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useSQLiteContext();
   const router = useRouter();
 
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('food');
-  const [date, setDate] = useState('');
-  const [amountEur, setAmountEur] = useState('');
-  const [amountLocal, setAmountLocal] = useState('');
-  const [localCurrency, setLocalCurrency] = useState('');
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("food");
+  const [date, setDate] = useState("");
+  const [amountEur, setAmountEur] = useState("");
+  const [amountLocal, setAmountLocal] = useState("");
+  const [localCurrency, setLocalCurrency] = useState("");
   const [receiptUri, setReceiptUri] = useState<string | null>(null);
   const [travelId, setTravelId] = useState(0);
   const [itineraryId, setItineraryId] = useState<number | null>(null);
@@ -37,8 +38,8 @@ export default function EditExpenseScreen() {
           setCategory(exp.category);
           setDate(exp.date);
           setAmountEur(exp.amount_eur.toString());
-          setAmountLocal(exp.amount_local?.toString() ?? '');
-          setLocalCurrency(exp.local_currency_code ?? '');
+          setAmountLocal(exp.amount_local?.toString() ?? "");
+          setLocalCurrency(exp.local_currency_code ?? "");
           setReceiptUri(exp.receipt_image_uri);
           setTravelId(exp.travel_id);
           setItineraryId(exp.itinerary_id);
@@ -49,7 +50,7 @@ export default function EditExpenseScreen() {
 
   const pickReceipt = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       quality: 0.8,
     });
     if (!result.canceled && result.assets[0]) {
@@ -114,8 +115,8 @@ export default function EditExpenseScreen() {
         onChangeCurrency={setLocalCurrency}
       />
 
-      <Button mode="outlined" icon="image" onPress={pickReceipt}>
-        {receiptUri ? 'Change Receipt' : 'Add Receipt'}
+      <Button mode="outlined" icon="image" onPress={pickReceipt} textColor={COLORS.text}>
+        {receiptUri ? "Change Receipt" : "Add Receipt"}
       </Button>
 
       {receiptUri && (
@@ -127,13 +128,14 @@ export default function EditExpenseScreen() {
         onPress={handleSave}
         loading={saving}
         disabled={saving || !description.trim() || !amountEur}
+        style={styles.saveButton}
       >
         Update Expense
       </Button>
 
       <Button
         mode="outlined"
-        textColor="#D32F2F"
+        textColor={COLORS.error}
         onPress={handleDelete}
         style={styles.deleteButton}
       >
@@ -146,19 +148,22 @@ export default function EditExpenseScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   content: {
     padding: 16,
     gap: 16,
   },
   receiptPreview: {
-    width: '100%',
+    width: "100%",
     height: 200,
     borderRadius: 8,
   },
+  saveButton: {
+    backgroundColor: COLORS.primary,
+  },
   deleteButton: {
-    borderColor: '#D32F2F',
+    borderColor: COLORS.error,
     marginBottom: 24,
   },
 });

@@ -1,15 +1,16 @@
-import { useState } from 'react';
-import { View, StyleSheet, ScrollView, Image } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
-import * as ImagePicker from 'expo-image-picker';
-import { useCurrentTravel } from '../../hooks/useCurrentTravel';
-import { insertExpense } from '../../db/queries/expense';
-import { CategoryPicker } from '../../components/expense/CategoryPicker';
-import { CurrencyInput } from '../../components/expense/CurrencyInput';
-import { VoiceInput } from '../../components/expense/VoiceInput';
-import { toISODate } from '../../utils/date';
+import { useState } from "react";
+import { View, StyleSheet, ScrollView, Image } from "react-native";
+import { TextInput, Button } from "react-native-paper";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import * as ImagePicker from "expo-image-picker";
+import { useCurrentTravel } from "../../hooks/useCurrentTravel";
+import { insertExpense } from "../../db/queries/expense";
+import { CategoryPicker } from "../../components/expense/CategoryPicker";
+import { CurrencyInput } from "../../components/expense/CurrencyInput";
+import { VoiceInput } from "../../components/expense/VoiceInput";
+import { toISODate } from "../../utils/date";
+import { COLORS } from "../../utils/constants";
 
 export default function AddExpenseScreen() {
   const { date: paramDate } = useLocalSearchParams<{ date?: string }>();
@@ -17,18 +18,18 @@ export default function AddExpenseScreen() {
   const router = useRouter();
   const { currentTravel } = useCurrentTravel();
 
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('food');
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("food");
   const [date, setDate] = useState(paramDate ?? toISODate(new Date()));
-  const [amountEur, setAmountEur] = useState('');
-  const [amountLocal, setAmountLocal] = useState('');
-  const [localCurrency, setLocalCurrency] = useState('');
+  const [amountEur, setAmountEur] = useState("");
+  const [amountLocal, setAmountLocal] = useState("");
+  const [localCurrency, setLocalCurrency] = useState("");
   const [receiptUri, setReceiptUri] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const pickReceipt = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       quality: 0.8,
     });
     if (!result.canceled && result.assets[0]) {
@@ -101,10 +102,10 @@ export default function AddExpenseScreen() {
       />
 
       <View style={styles.receiptRow}>
-        <Button mode="outlined" icon="camera" onPress={takePhoto} style={styles.receiptButton}>
+        <Button mode="outlined" icon="camera" onPress={takePhoto} style={styles.receiptButton} textColor={COLORS.text}>
           Camera
         </Button>
-        <Button mode="outlined" icon="image" onPress={pickReceipt} style={styles.receiptButton}>
+        <Button mode="outlined" icon="image" onPress={pickReceipt} style={styles.receiptButton} textColor={COLORS.text}>
           Gallery
         </Button>
       </View>
@@ -129,7 +130,7 @@ export default function AddExpenseScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
   },
   content: {
     padding: 16,
@@ -137,19 +138,21 @@ const styles = StyleSheet.create({
   },
   input: {},
   receiptRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   receiptButton: {
     flex: 1,
+    borderColor: COLORS.border,
   },
   receiptPreview: {
-    width: '100%',
+    width: "100%",
     height: 200,
     borderRadius: 8,
   },
   saveButton: {
     marginTop: 8,
     marginBottom: 24,
+    backgroundColor: COLORS.primary,
   },
 });

@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
-import { IconButton, Text, useTheme } from 'react-native-paper';
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet } from "react-native";
+import { IconButton, Text } from "react-native-paper";
+import { COLORS } from "../../utils/constants";
 
 interface VoiceInputProps {
   onTranscript: (text: string) => void;
 }
 
-export function VoiceInput({ onTranscript }: VoiceInputProps) {
-  const theme = useTheme();
+const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript }) => {
   const [isListening, setIsListening] = useState(false);
   const [available, setAvailable] = useState(false);
-  const [transcript, setTranscript] = useState('');
 
   useEffect(() => {
     checkAvailability();
@@ -18,7 +17,7 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
 
   const checkAvailability = async () => {
     try {
-      const ExpoSpeechRecognition = require('expo-speech-recognition');
+      const ExpoSpeechRecognition = require("expo-speech-recognition");
       if (ExpoSpeechRecognition) {
         setAvailable(true);
       }
@@ -29,15 +28,14 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
 
   const startListening = async () => {
     try {
-      const ExpoSpeechRecognition = require('expo-speech-recognition');
-      const { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } =
-        ExpoSpeechRecognition;
+      const ExpoSpeechRecognition = require("expo-speech-recognition");
+      const { ExpoSpeechRecognitionModule } = ExpoSpeechRecognition;
 
       const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
       if (!result.granted) return;
 
       setIsListening(true);
-      ExpoSpeechRecognitionModule.start({ lang: 'en-US' });
+      ExpoSpeechRecognitionModule.start({ lang: "en-US" });
     } catch {
       setIsListening(false);
     }
@@ -45,7 +43,7 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
 
   const stopListening = async () => {
     try {
-      const ExpoSpeechRecognition = require('expo-speech-recognition');
+      const ExpoSpeechRecognition = require("expo-speech-recognition");
       ExpoSpeechRecognition.ExpoSpeechRecognitionModule.stop();
     } catch {}
     setIsListening(false);
@@ -56,26 +54,33 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
   return (
     <View style={styles.container}>
       <IconButton
-        icon={isListening ? 'microphone-off' : 'microphone'}
+        icon={isListening ? "microphone-off" : "microphone"}
         mode="contained"
-        iconColor={isListening ? '#D32F2F' : theme.colors.primary}
+        iconColor={isListening ? COLORS.error : COLORS.primary}
         size={28}
         onPress={isListening ? stopListening : startListening}
+        style={styles.button}
       />
       <Text variant="bodySmall" style={styles.hint}>
-        {isListening ? 'Listening... tap to stop' : 'Tap to speak'}
+        {isListening ? "Listening... tap to stop" : "Tap to speak"}
       </Text>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
+  button: {
+    backgroundColor: COLORS.surfaceLight,
+  },
   hint: {
-    color: '#757575',
+    color: COLORS.textSecondary,
   },
 });
+
+export default VoiceInput;
+export { VoiceInput };

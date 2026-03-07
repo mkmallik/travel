@@ -1,12 +1,12 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
-import type { Expense } from '../../types/database';
+import type { SQLiteDatabase } from "expo-sqlite";
+import type { ExpenseData, DailyTotalData, CategoryTotalData } from "../../types/database";
 
 export async function getExpensesByTravel(
   db: SQLiteDatabase,
   travelId: number
-): Promise<Expense[]> {
-  return db.getAllAsync<Expense>(
-    'SELECT * FROM expense WHERE travel_id = ? ORDER BY date ASC, expense_id ASC',
+): Promise<ExpenseData[]> {
+  return db.getAllAsync<ExpenseData>(
+    "SELECT * FROM expense WHERE travel_id = ? ORDER BY date ASC, expense_id ASC",
     [travelId]
   );
 }
@@ -15,9 +15,9 @@ export async function getExpensesByDate(
   db: SQLiteDatabase,
   travelId: number,
   date: string
-): Promise<Expense[]> {
-  return db.getAllAsync<Expense>(
-    'SELECT * FROM expense WHERE travel_id = ? AND date = ? ORDER BY expense_id ASC',
+): Promise<ExpenseData[]> {
+  return db.getAllAsync<ExpenseData>(
+    "SELECT * FROM expense WHERE travel_id = ? AND date = ? ORDER BY expense_id ASC",
     [travelId, date]
   );
 }
@@ -25,24 +25,18 @@ export async function getExpensesByDate(
 export async function getExpenseById(
   db: SQLiteDatabase,
   expenseId: number
-): Promise<Expense | null> {
-  return db.getFirstAsync<Expense>(
-    'SELECT * FROM expense WHERE expense_id = ?',
+): Promise<ExpenseData | null> {
+  return db.getFirstAsync<ExpenseData>(
+    "SELECT * FROM expense WHERE expense_id = ?",
     [expenseId]
   );
-}
-
-export interface DailyTotal {
-  date: string;
-  total_eur: number;
-  count: number;
 }
 
 export async function getDailyTotals(
   db: SQLiteDatabase,
   travelId: number
-): Promise<DailyTotal[]> {
-  return db.getAllAsync<DailyTotal>(
+): Promise<DailyTotalData[]> {
+  return db.getAllAsync<DailyTotalData>(
     `SELECT date, SUM(amount_eur) as total_eur, COUNT(*) as count
      FROM expense WHERE travel_id = ?
      GROUP BY date ORDER BY date ASC`,
@@ -50,17 +44,11 @@ export async function getDailyTotals(
   );
 }
 
-export interface CategoryTotal {
-  category: string;
-  total_eur: number;
-  count: number;
-}
-
 export async function getCategoryTotals(
   db: SQLiteDatabase,
   travelId: number
-): Promise<CategoryTotal[]> {
-  return db.getAllAsync<CategoryTotal>(
+): Promise<CategoryTotalData[]> {
+  return db.getAllAsync<CategoryTotalData>(
     `SELECT category, SUM(amount_eur) as total_eur, COUNT(*) as count
      FROM expense WHERE travel_id = ?
      GROUP BY category ORDER BY total_eur DESC`,
@@ -73,7 +61,7 @@ export async function getTotalExpenses(
   travelId: number
 ): Promise<number> {
   const result = await db.getFirstAsync<{ total: number }>(
-    'SELECT COALESCE(SUM(amount_eur), 0) as total FROM expense WHERE travel_id = ?',
+    "SELECT COALESCE(SUM(amount_eur), 0) as total FROM expense WHERE travel_id = ?",
     [travelId]
   );
   return result?.total ?? 0;
@@ -81,7 +69,7 @@ export async function getTotalExpenses(
 
 export async function insertExpense(
   db: SQLiteDatabase,
-  expense: Omit<Expense, 'expense_id'>
+  expense: Omit<ExpenseData, "expense_id">
 ): Promise<number> {
   const result = await db.runAsync(
     `INSERT INTO expense (
@@ -107,7 +95,7 @@ export async function insertExpense(
 
 export async function updateExpense(
   db: SQLiteDatabase,
-  expense: Expense
+  expense: ExpenseData
 ): Promise<void> {
   await db.runAsync(
     `UPDATE expense SET
@@ -135,5 +123,5 @@ export async function deleteExpense(
   db: SQLiteDatabase,
   expenseId: number
 ): Promise<void> {
-  await db.runAsync('DELETE FROM expense WHERE expense_id = ?', [expenseId]);
+  await db.runAsync("DELETE FROM expense WHERE expense_id = ?", [expenseId]);
 }
