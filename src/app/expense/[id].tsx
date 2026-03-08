@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, Image } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import * as ImagePicker from "expo-image-picker";
+import { useCurrentTravel } from "../../hooks/useCurrentTravel";
 import {
   getExpenseById,
   updateExpense,
@@ -16,8 +16,8 @@ import { COLORS } from "../../utils/constants";
 
 export default function EditExpenseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const db = useSQLiteContext();
   const router = useRouter();
+  const { currentTravel } = useCurrentTravel();
 
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("food");
@@ -31,8 +31,8 @@ export default function EditExpenseScreen() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      getExpenseById(db, Number(id)).then((exp) => {
+    if (id && currentTravel) {
+      getExpenseById(currentTravel.travel_id, Number(id)).then((exp) => {
         if (exp) {
           setDescription(exp.description);
           setCategory(exp.category);
@@ -46,7 +46,7 @@ export default function EditExpenseScreen() {
         }
       });
     }
-  }, [id]);
+  }, [id, currentTravel?.travel_id]);
 
   const pickReceipt = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -59,10 +59,10 @@ export default function EditExpenseScreen() {
   };
 
   const handleSave = async () => {
-    if (!description.trim() || !amountEur) return;
+    if (!description.trim() || !amountEur || !travelId) return;
     setSaving(true);
     try {
-      await updateExpense(db, {
+      await updateExpense(travelId, {
         expense_id: Number(id),
         travel_id: travelId,
         itinerary_id: itineraryId,
@@ -82,7 +82,8 @@ export default function EditExpenseScreen() {
   };
 
   const handleDelete = async () => {
-    await deleteExpense(db, Number(id));
+    if (!travelId) return;
+    await deleteExpense(travelId, Number(id));
     router.back();
   };
 

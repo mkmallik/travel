@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { View, FlatList, StyleSheet } from "react-native";
 import { useFocusEffect } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import { Card, Text, Divider } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useCurrentTravel } from "../../hooks/useCurrentTravel";
@@ -16,7 +15,6 @@ import { getCategoryLabel, getCategoryIcon, COLORS, CATEGORY_COLORS } from "../.
 import type { CategoryTotalData } from "../../types/database";
 
 export default function CategoryTotalsTab() {
-  const db = useSQLiteContext();
   const { currentTravel } = useCurrentTravel();
   const [categories, setCategories] = useState<CategoryTotalData[]>([]);
   const [grandTotal, setGrandTotal] = useState(0);
@@ -24,8 +22,8 @@ export default function CategoryTotalsTab() {
   useFocusEffect(
     useCallback(() => {
       if (currentTravel) {
-        getCategoryTotals(db, currentTravel.travel_id).then(setCategories);
-        getTotalExpenses(db, currentTravel.travel_id).then(setGrandTotal);
+        getCategoryTotals(currentTravel.travel_id).then(setCategories);
+        getTotalExpenses(currentTravel.travel_id).then(setGrandTotal);
       } else {
         setCategories([]);
         setGrandTotal(0);

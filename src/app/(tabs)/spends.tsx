@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { View, FlatList, StyleSheet, Pressable, Image } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import { Text, IconButton, Divider } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useCurrentTravel } from "../../hooks/useCurrentTravel";
@@ -61,7 +60,6 @@ const ExpenseRow: React.FC<ExpenseRowProps> = ({ item, onPress, onDelete }) => {
 };
 
 export default function SpendsTab() {
-  const db = useSQLiteContext();
   const router = useRouter();
   const { currentTravel } = useCurrentTravel();
   const [selectedDate, setSelectedDate] = useState(toISODate(new Date()));
@@ -69,7 +67,7 @@ export default function SpendsTab() {
 
   const loadExpenses = useCallback(async () => {
     if (currentTravel) {
-      const list = await getExpensesByDate(db, currentTravel.travel_id, selectedDate);
+      const list = await getExpensesByDate(currentTravel.travel_id, selectedDate);
       setExpenses(list);
     } else {
       setExpenses([]);
@@ -83,7 +81,8 @@ export default function SpendsTab() {
   );
 
   const handleDelete = async (expenseId: number) => {
-    await deleteExpense(db, expenseId);
+    if (!currentTravel) return;
+    await deleteExpense(currentTravel.travel_id, expenseId);
     loadExpenses();
   };
 

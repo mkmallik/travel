@@ -2,13 +2,11 @@ import { useState } from "react";
 import { StyleSheet, ScrollView } from "react-native";
 import { TextInput, Button, SegmentedButtons } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import { useCurrentTravel } from "../../hooks/useCurrentTravel";
 import { insertLink } from "../../db/queries/links";
 import { COLORS, LINK_TYPES } from "../../utils/constants";
 
 export default function AddLinkScreen() {
-  const db = useSQLiteContext();
   const router = useRouter();
   const { currentTravel } = useCurrentTravel();
 
@@ -21,7 +19,7 @@ export default function AddLinkScreen() {
     if (!title.trim() || !url.trim() || !currentTravel) return;
     setSaving(true);
     try {
-      await insertLink(db, {
+      await insertLink({
         travel_id: currentTravel.travel_id,
         type,
         title: title.trim(),

@@ -2,12 +2,11 @@ import { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, Image, Pressable } from "react-native";
 import { TextInput, Button, Text, Divider, IconButton } from "react-native-paper";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useCurrentTravel } from "../../hooks/useCurrentTravel";
 import {
-  getItineraryById,
+  getItineraryByIdWithTravel,
   insertItinerary,
   updateItinerary,
   deleteItinerary,
@@ -175,7 +174,6 @@ const ReadOnlySection: React.FC<ReadOnlySectionProps> = ({ itinerary }) => {
 
 export default function ItineraryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const db = useSQLiteContext();
   const router = useRouter();
   const { currentTravel } = useCurrentTravel();
   const isNew = id === "new";
@@ -204,8 +202,8 @@ export default function ItineraryDetailScreen() {
   });
 
   useEffect(() => {
-    if (!isNew && id) {
-      getItineraryById(db, Number(id)).then((it) => {
+    if (!isNew && id && currentTravel) {
+      getItineraryByIdWithTravel(currentTravel.travel_id, Number(id)).then((it) => {
         if (it) {
           setItinerary(it);
           setForm({
@@ -230,7 +228,7 @@ export default function ItineraryDetailScreen() {
         }
       });
     }
-  }, [id]);
+  }, [id, currentTravel?.travel_id]);
 
   const pickCityImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -246,8 +244,7 @@ export default function ItineraryDetailScreen() {
     if (!form.city.trim() || !currentTravel) return;
     setSaving(true);
     try {
-      const data: Omit<ItineraryData, "itinerary_id"> = {
-        travel_id: currentTravel.travel_id,
+      const data = {
         date: form.date,
         day_no: form.day_no,
         city: form.city.trim(),
@@ -268,14 +265,18 @@ export default function ItineraryDetailScreen() {
       };
 
       if (isNew) {
-        await insertItinerary(db, data);
+        await insertItinerary(currentTravel.travel_id, data);
       } else {
-        await updateItinerary(db, { ...data, itinerary_id: Number(id) });
+        await updateItinerary(currentTravel.travel_id, {
+          ...data,
+          itinerary_id: Number(id),
+          travel_id: currentTravel.travel_id,
+        });
       }
       if (isNew) {
         router.back();
       } else {
-        const updated = await getItineraryById(db, Number(id));
+        const updated = await getItineraryByIdWithTravel(currentTravel.travel_id, Number(id));
         setItinerary(updated);
         setEditing(false);
       }
@@ -285,8 +286,8 @@ export default function ItineraryDetailScreen() {
   };
 
   const handleDelete = async () => {
-    if (!isNew && id) {
-      await deleteItinerary(db, Number(id));
+    if (!isNew && id && currentTravel) {
+      await deleteItinerary(currentTravel.travel_id, Number(id));
       router.back();
     }
   };

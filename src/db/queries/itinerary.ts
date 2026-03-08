@@ -1,114 +1,60 @@
-import type { SQLiteDatabase } from "expo-sqlite";
+import { apiGet, apiPost, apiPut, apiDelete } from "../../api/client";
 import type { ItineraryData } from "../../types/database";
 
 export async function getItinerariesByTravel(
-  db: SQLiteDatabase,
   travelId: number
 ): Promise<ItineraryData[]> {
-  return db.getAllAsync<ItineraryData>(
-    "SELECT * FROM itinerary WHERE travel_id = ? ORDER BY day_no ASC",
-    [travelId]
-  );
+  return apiGet<ItineraryData[]>(`/travels/${travelId}/itineraries`);
 }
 
-export async function getItineraryById(
-  db: SQLiteDatabase,
+export async function getItineraryByIdWithTravel(
+  travelId: number,
   itineraryId: number
 ): Promise<ItineraryData | null> {
-  return db.getFirstAsync<ItineraryData>(
-    "SELECT * FROM itinerary WHERE itinerary_id = ?",
-    [itineraryId]
-  );
+  try {
+    return await apiGet<ItineraryData>(
+      `/travels/${travelId}/itineraries/${itineraryId}`
+    );
+  } catch {
+    return null;
+  }
 }
 
 export async function getItineraryByDate(
-  db: SQLiteDatabase,
   travelId: number,
   date: string
 ): Promise<ItineraryData | null> {
-  return db.getFirstAsync<ItineraryData>(
-    "SELECT * FROM itinerary WHERE travel_id = ? AND date = ?",
-    [travelId, date]
+  const list = await apiGet<ItineraryData[]>(
+    `/travels/${travelId}/itineraries?date=${date}`
   );
+  return list.length > 0 ? list[0] : null;
 }
 
 export async function insertItinerary(
-  db: SQLiteDatabase,
-  itinerary: Omit<ItineraryData, "itinerary_id">
+  travelId: number,
+  itinerary: Omit<ItineraryData, "itinerary_id" | "travel_id">
 ): Promise<number> {
-  const result = await db.runAsync(
-    `INSERT INTO itinerary (
-      travel_id, date, day_no, city, city_image_uri,
-      flight_detail, transport_mode, transport_cost,
-      hotel_name, hotel_address, booking_id, hotel_cost,
-      food_cost, transportation_cost, activities_cost, misc_cost,
-      activity_description, notes
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      itinerary.travel_id,
-      itinerary.date,
-      itinerary.day_no,
-      itinerary.city,
-      itinerary.city_image_uri,
-      itinerary.flight_detail,
-      itinerary.transport_mode,
-      itinerary.transport_cost,
-      itinerary.hotel_name,
-      itinerary.hotel_address,
-      itinerary.booking_id,
-      itinerary.hotel_cost,
-      itinerary.food_cost,
-      itinerary.transportation_cost,
-      itinerary.activities_cost,
-      itinerary.misc_cost,
-      itinerary.activity_description,
-      itinerary.notes,
-    ]
+  const res = await apiPost<ItineraryData>(
+    `/travels/${travelId}/itineraries`,
+    itinerary
   );
-  return result.lastInsertRowId;
+  return res.itinerary_id;
 }
 
 export async function updateItinerary(
-  db: SQLiteDatabase,
+  travelId: number,
   itinerary: ItineraryData
 ): Promise<void> {
-  await db.runAsync(
-    `UPDATE itinerary SET
-      travel_id = ?, date = ?, day_no = ?, city = ?, city_image_uri = ?,
-      flight_detail = ?, transport_mode = ?, transport_cost = ?,
-      hotel_name = ?, hotel_address = ?, booking_id = ?, hotel_cost = ?,
-      food_cost = ?, transportation_cost = ?, activities_cost = ?, misc_cost = ?,
-      activity_description = ?, notes = ?
-     WHERE itinerary_id = ?`,
-    [
-      itinerary.travel_id,
-      itinerary.date,
-      itinerary.day_no,
-      itinerary.city,
-      itinerary.city_image_uri,
-      itinerary.flight_detail,
-      itinerary.transport_mode,
-      itinerary.transport_cost,
-      itinerary.hotel_name,
-      itinerary.hotel_address,
-      itinerary.booking_id,
-      itinerary.hotel_cost,
-      itinerary.food_cost,
-      itinerary.transportation_cost,
-      itinerary.activities_cost,
-      itinerary.misc_cost,
-      itinerary.activity_description,
-      itinerary.notes,
-      itinerary.itinerary_id,
-    ]
+  const { itinerary_id, travel_id, ...data } = itinerary;
+  await apiPut(
+    `/travels/${travelId}/itineraries/${itinerary_id}`,
+    data
   );
 }
 
 export async function deleteItinerary(
-  db: SQLiteDatabase,
+  travelId: number,
   itineraryId: number
 ): Promise<void> {
-  await db.runAsync("DELETE FROM itinerary WHERE itinerary_id = ?", [
-    itineraryId,
-  ]);
+  await apiDelete(`/travels/${travelId}/itineraries/${itineraryId}`);
 }

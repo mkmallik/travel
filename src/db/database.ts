@@ -44,6 +44,13 @@ async function seedIfEmpty(db: SQLite.SQLiteDatabase): Promise<void> {
     ['demo@travel.app', demoHash, 'Demo User']
   );
 
+  // Create user (mkmallik@gmail.com / manas123)
+  const manasHash = await hashPassword('manas123', 'mkmallik@gmail.com');
+  await db.runAsync(
+    'INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)',
+    ['mkmallik@gmail.com', manasHash, 'Manas']
+  );
+
   // --- Trip 1: Italy 2026 ---
   await db.runAsync(
     `INSERT INTO travel (user_id, description, start_date, end_date, countries, cover_image_uri) VALUES (?, ?, ?, ?, ?, ?)`,

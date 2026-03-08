@@ -1,127 +1,79 @@
-import type { SQLiteDatabase } from "expo-sqlite";
-import type { ExpenseData, DailyTotalData, CategoryTotalData } from "../../types/database";
+import { apiGet, apiPost, apiPut, apiDelete } from "../../api/client";
+import type {
+  ExpenseData,
+  DailyTotalData,
+  CategoryTotalData,
+} from "../../types/database";
 
 export async function getExpensesByTravel(
-  db: SQLiteDatabase,
   travelId: number
 ): Promise<ExpenseData[]> {
-  return db.getAllAsync<ExpenseData>(
-    "SELECT * FROM expense WHERE travel_id = ? ORDER BY date ASC, expense_id ASC",
-    [travelId]
-  );
+  return apiGet<ExpenseData[]>(`/travels/${travelId}/expenses`);
 }
 
 export async function getExpensesByDate(
-  db: SQLiteDatabase,
   travelId: number,
   date: string
 ): Promise<ExpenseData[]> {
-  return db.getAllAsync<ExpenseData>(
-    "SELECT * FROM expense WHERE travel_id = ? AND date = ? ORDER BY expense_id ASC",
-    [travelId, date]
-  );
+  return apiGet<ExpenseData[]>(`/travels/${travelId}/expenses?date=${date}`);
 }
 
 export async function getExpenseById(
-  db: SQLiteDatabase,
+  travelId: number,
   expenseId: number
 ): Promise<ExpenseData | null> {
-  return db.getFirstAsync<ExpenseData>(
-    "SELECT * FROM expense WHERE expense_id = ?",
-    [expenseId]
-  );
+  try {
+    return await apiGet<ExpenseData>(
+      `/travels/${travelId}/expenses/${expenseId}`
+    );
+  } catch {
+    return null;
+  }
 }
 
 export async function getDailyTotals(
-  db: SQLiteDatabase,
   travelId: number
 ): Promise<DailyTotalData[]> {
-  return db.getAllAsync<DailyTotalData>(
-    `SELECT date, SUM(amount_eur) as total_eur, COUNT(*) as count
-     FROM expense WHERE travel_id = ?
-     GROUP BY date ORDER BY date ASC`,
-    [travelId]
-  );
+  return apiGet<DailyTotalData[]>(`/travels/${travelId}/expenses/daily-totals`);
 }
 
 export async function getCategoryTotals(
-  db: SQLiteDatabase,
   travelId: number
 ): Promise<CategoryTotalData[]> {
-  return db.getAllAsync<CategoryTotalData>(
-    `SELECT category, SUM(amount_eur) as total_eur, COUNT(*) as count
-     FROM expense WHERE travel_id = ?
-     GROUP BY category ORDER BY total_eur DESC`,
-    [travelId]
+  return apiGet<CategoryTotalData[]>(
+    `/travels/${travelId}/expenses/category-totals`
   );
 }
 
-export async function getTotalExpenses(
-  db: SQLiteDatabase,
-  travelId: number
-): Promise<number> {
-  const result = await db.getFirstAsync<{ total: number }>(
-    "SELECT COALESCE(SUM(amount_eur), 0) as total FROM expense WHERE travel_id = ?",
-    [travelId]
+export async function getTotalExpenses(travelId: number): Promise<number> {
+  const res = await apiGet<{ total_eur: number }>(
+    `/travels/${travelId}/expenses/total`
   );
-  return result?.total ?? 0;
+  return res.total_eur;
 }
 
 export async function insertExpense(
-  db: SQLiteDatabase,
-  expense: Omit<ExpenseData, "expense_id">
+  travelId: number,
+  expense: Omit<ExpenseData, "expense_id" | "travel_id">
 ): Promise<number> {
-  const result = await db.runAsync(
-    `INSERT INTO expense (
-      travel_id, itinerary_id, date, description, category,
-      amount_eur, amount_local, local_currency_code,
-      receipt_image_uri, voice_note_uri
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      expense.travel_id,
-      expense.itinerary_id,
-      expense.date,
-      expense.description,
-      expense.category,
-      expense.amount_eur,
-      expense.amount_local,
-      expense.local_currency_code,
-      expense.receipt_image_uri,
-      expense.voice_note_uri,
-    ]
+  const res = await apiPost<ExpenseData>(
+    `/travels/${travelId}/expenses`,
+    expense
   );
-  return result.lastInsertRowId;
+  return res.expense_id;
 }
 
 export async function updateExpense(
-  db: SQLiteDatabase,
+  travelId: number,
   expense: ExpenseData
 ): Promise<void> {
-  await db.runAsync(
-    `UPDATE expense SET
-      travel_id = ?, itinerary_id = ?, date = ?, description = ?, category = ?,
-      amount_eur = ?, amount_local = ?, local_currency_code = ?,
-      receipt_image_uri = ?, voice_note_uri = ?
-     WHERE expense_id = ?`,
-    [
-      expense.travel_id,
-      expense.itinerary_id,
-      expense.date,
-      expense.description,
-      expense.category,
-      expense.amount_eur,
-      expense.amount_local,
-      expense.local_currency_code,
-      expense.receipt_image_uri,
-      expense.voice_note_uri,
-      expense.expense_id,
-    ]
-  );
+  const { expense_id, travel_id, ...data } = expense;
+  await apiPut(`/travels/${travelId}/expenses/${expense_id}`, data);
 }
 
 export async function deleteExpense(
-  db: SQLiteDatabase,
+  travelId: number,
   expenseId: number
 ): Promise<void> {
-  await db.runAsync("DELETE FROM expense WHERE expense_id = ?", [expenseId]);
+  await apiDelete(`/travels/${travelId}/expenses/${expenseId}`);
 }

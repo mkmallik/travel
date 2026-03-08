@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { useSQLiteContext } from "expo-sqlite";
 import type { UserData } from "../types/database";
-import { getUserByEmail, getUserById, createUser } from "../db/queries/users";
-import { hashPassword } from "../db/database";
+import { loginUser, signupUser } from "../db/queries/users";
+import { setToken } from "../api/client";
 
 interface AuthContextValue {
   user: UserData | null;
@@ -21,40 +20,27 @@ const AuthContext = createContext<AuthContextValue>({
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const db = useSQLiteContext();
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const existing = await getUserByEmail(db, email);
-      if (!existing) {
-        throw new Error("No account found with that email");
-      }
-      const hash = await hashPassword(password, email);
-      if (hash !== existing.password_hash) {
-        throw new Error("Incorrect password");
-      }
-      setUser(existing);
+      const userData = await loginUser(email, password);
+      setUser(userData);
     },
-    [db]
+    []
   );
 
   const signup = useCallback(
     async (email: string, password: string, name?: string) => {
-      const existing = await getUserByEmail(db, email);
-      if (existing) {
-        throw new Error("An account with that email already exists");
-      }
-      const hash = await hashPassword(password, email);
-      const userId = await createUser(db, email, hash, name);
-      const newUser = await getUserById(db, userId);
-      setUser(newUser);
+      const userData = await signupUser(email, password, name);
+      setUser(userData);
     },
-    [db]
+    []
   );
 
   const logout = useCallback(() => {
+    setToken(null);
     setUser(null);
   }, []);
 

@@ -1,23 +1,11 @@
-import { Suspense } from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Stack } from "expo-router";
-import { SQLiteProvider } from "expo-sqlite";
 import { PaperProvider, Text } from "react-native-paper";
 import { StatusBar } from "expo-status-bar";
 import { theme } from "../constants/theme";
 import { COLORS } from "../utils/constants";
-import { DB_NAME, initDatabase } from "../db/database";
 import { ActiveTravelProvider } from "../hooks/useCurrentTravel";
 import { AuthProvider, useAuth } from "../hooks/useAuth";
-
-function Loading() {
-  return (
-    <View style={styles.loading}>
-      <ActivityIndicator size="large" color={COLORS.primary} />
-      <Text style={styles.loadingText}>Loading Travel Log...</Text>
-    </View>
-  );
-}
 
 function AppNavigator() {
   const { user } = useAuth();
@@ -71,16 +59,12 @@ function AppNavigator() {
 
 export default function RootLayout() {
   return (
-    <Suspense fallback={<Loading />}>
-      <SQLiteProvider databaseName={DB_NAME} onInit={initDatabase}>
-        <PaperProvider theme={theme}>
-          <AuthProvider>
-            <StatusBar style="light" />
-            <AppNavigator />
-          </AuthProvider>
-        </PaperProvider>
-      </SQLiteProvider>
-    </Suspense>
+    <PaperProvider theme={theme}>
+      <AuthProvider>
+        <StatusBar style="light" />
+        <AppNavigator />
+      </AuthProvider>
+    </PaperProvider>
   );
 }
 

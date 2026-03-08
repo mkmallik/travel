@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { View, SectionList, StyleSheet, Linking } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import { List, Text, IconButton, Divider } from "react-native-paper";
 import { useCurrentTravel } from "../../hooks/useCurrentTravel";
 import { getLinksByTravel, deleteLink } from "../../db/queries/links";
@@ -17,14 +16,13 @@ interface Section {
 }
 
 export default function DataLinksTab() {
-  const db = useSQLiteContext();
   const router = useRouter();
   const { currentTravel } = useCurrentTravel();
   const [sections, setSections] = useState<Section[]>([]);
 
   const loadLinks = useCallback(async () => {
     if (currentTravel) {
-      const links = await getLinksByTravel(db, currentTravel.travel_id);
+      const links = await getLinksByTravel(currentTravel.travel_id);
       const grouped: Record<string, LinkData[]> = {};
       for (const link of links) {
         const type = link.type || "other";
@@ -49,7 +47,7 @@ export default function DataLinksTab() {
   );
 
   const handleDelete = async (linkId: number) => {
-    await deleteLink(db, linkId);
+    await deleteLink(linkId);
     loadLinks();
   };
 

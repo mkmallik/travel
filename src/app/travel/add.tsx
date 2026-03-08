@@ -2,7 +2,6 @@ import { useState } from "react";
 import { StyleSheet, ScrollView } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import * as ImagePicker from "expo-image-picker";
 import { insertTravel } from "../../db/queries/travel";
 import { useCurrentTravel } from "../../hooks/useCurrentTravel";
@@ -11,7 +10,6 @@ import { toISODate } from "../../utils/date";
 import { COLORS } from "../../utils/constants";
 
 export default function AddTravelScreen() {
-  const db = useSQLiteContext();
   const router = useRouter();
   const { refreshTravels, setCurrentTravelId } = useCurrentTravel();
   const { user } = useAuth();
@@ -37,7 +35,7 @@ export default function AddTravelScreen() {
     if (!description.trim()) return;
     setSaving(true);
     try {
-      const id = await insertTravel(db, {
+      const id = await insertTravel({
         user_id: user!.user_id,
         description: description.trim(),
         start_date: startDate,

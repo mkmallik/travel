@@ -2,7 +2,6 @@ import { useState } from "react";
 import { View, StyleSheet, ScrollView, Image } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import * as ImagePicker from "expo-image-picker";
 import { useCurrentTravel } from "../../hooks/useCurrentTravel";
 import { insertExpense } from "../../db/queries/expense";
@@ -14,7 +13,6 @@ import { COLORS } from "../../utils/constants";
 
 export default function AddExpenseScreen() {
   const { date: paramDate } = useLocalSearchParams<{ date?: string }>();
-  const db = useSQLiteContext();
   const router = useRouter();
   const { currentTravel } = useCurrentTravel();
 
@@ -52,8 +50,7 @@ export default function AddExpenseScreen() {
     if (!currentTravel || !description.trim() || !amountEur) return;
     setSaving(true);
     try {
-      await insertExpense(db, {
-        travel_id: currentTravel.travel_id,
+      await insertExpense(currentTravel.travel_id, {
         itinerary_id: null,
         date,
         description: description.trim(),

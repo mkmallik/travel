@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { View, FlatList, StyleSheet } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import { IconButton } from "react-native-paper";
 import { useCurrentTravel } from "../../hooks/useCurrentTravel";
 import { getItinerariesByTravel } from "../../db/queries/itinerary";
@@ -14,7 +13,6 @@ import { COLORS } from "../../utils/constants";
 import type { ItineraryData } from "../../types/database";
 
 export default function ItinerariesTab() {
-  const db = useSQLiteContext();
   const router = useRouter();
   const { currentTravel } = useCurrentTravel();
   const [itineraries, setItineraries] = useState<ItineraryData[]>([]);
@@ -23,7 +21,7 @@ export default function ItinerariesTab() {
   useFocusEffect(
     useCallback(() => {
       if (currentTravel) {
-        getItinerariesByTravel(db, currentTravel.travel_id).then(
+        getItinerariesByTravel(currentTravel.travel_id).then(
           setItineraries
         );
       } else {

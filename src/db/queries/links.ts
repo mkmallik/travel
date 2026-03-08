@@ -1,60 +1,38 @@
-import type { SQLiteDatabase } from "expo-sqlite";
+import { apiGet, apiPost, apiPut, apiDelete } from "../../api/client";
 import type { LinkData } from "../../types/database";
 
 export async function getLinksByTravel(
-  db: SQLiteDatabase,
   travelId: number
 ): Promise<LinkData[]> {
-  return db.getAllAsync<LinkData>(
-    "SELECT * FROM important_links WHERE travel_id = ? ORDER BY type ASC, title ASC",
-    [travelId]
-  );
+  return apiGet<LinkData[]>(`/travels/${travelId}/links`);
 }
 
-export async function getAllLinks(
-  db: SQLiteDatabase
-): Promise<LinkData[]> {
-  return db.getAllAsync<LinkData>(
-    "SELECT * FROM important_links ORDER BY type ASC, title ASC"
-  );
+export async function getAllLinks(): Promise<LinkData[]> {
+  return apiGet<LinkData[]>("/links");
 }
 
 export async function getLinkById(
-  db: SQLiteDatabase,
   linkId: number
 ): Promise<LinkData | null> {
-  return db.getFirstAsync<LinkData>(
-    "SELECT * FROM important_links WHERE link_id = ?",
-    [linkId]
-  );
+  try {
+    return await apiGet<LinkData>(`/links/${linkId}`);
+  } catch {
+    return null;
+  }
 }
 
 export async function insertLink(
-  db: SQLiteDatabase,
   link: Omit<LinkData, "link_id">
 ): Promise<number> {
-  const result = await db.runAsync(
-    `INSERT INTO important_links (travel_id, type, title, url, icon_url)
-     VALUES (?, ?, ?, ?, ?)`,
-    [link.travel_id, link.type, link.title, link.url, link.icon_url]
-  );
-  return result.lastInsertRowId;
+  const res = await apiPost<LinkData>("/links", link);
+  return res.link_id;
 }
 
-export async function updateLink(
-  db: SQLiteDatabase,
-  link: LinkData
-): Promise<void> {
-  await db.runAsync(
-    `UPDATE important_links SET travel_id = ?, type = ?, title = ?, url = ?, icon_url = ?
-     WHERE link_id = ?`,
-    [link.travel_id, link.type, link.title, link.url, link.icon_url, link.link_id]
-  );
+export async function updateLink(link: LinkData): Promise<void> {
+  const { link_id, ...data } = link;
+  await apiPut(`/links/${link_id}`, data);
 }
 
-export async function deleteLink(
-  db: SQLiteDatabase,
-  linkId: number
-): Promise<void> {
-  await db.runAsync("DELETE FROM important_links WHERE link_id = ?", [linkId]);
+export async function deleteLink(linkId: number): Promise<void> {
+  await apiDelete(`/links/${linkId}`);
 }

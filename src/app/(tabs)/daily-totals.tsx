@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { View, FlatList, StyleSheet } from "react-native";
 import { useFocusEffect } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import { Card, Text, Divider } from "react-native-paper";
 import { useCurrentTravel } from "../../hooks/useCurrentTravel";
 import {
@@ -16,7 +15,6 @@ import { COLORS } from "../../utils/constants";
 import type { DailyTotalData } from "../../types/database";
 
 export default function DailyTotalsTab() {
-  const db = useSQLiteContext();
   const { currentTravel } = useCurrentTravel();
   const [dailyTotals, setDailyTotals] = useState<DailyTotalData[]>([]);
   const [grandTotal, setGrandTotal] = useState(0);
@@ -24,8 +22,8 @@ export default function DailyTotalsTab() {
   useFocusEffect(
     useCallback(() => {
       if (currentTravel) {
-        getDailyTotals(db, currentTravel.travel_id).then(setDailyTotals);
-        getTotalExpenses(db, currentTravel.travel_id).then(setGrandTotal);
+        getDailyTotals(currentTravel.travel_id).then(setDailyTotals);
+        getTotalExpenses(currentTravel.travel_id).then(setGrandTotal);
       } else {
         setDailyTotals([]);
         setGrandTotal(0);

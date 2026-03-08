@@ -1,63 +1,43 @@
-import type { SQLiteDatabase } from "expo-sqlite";
+import { apiGet, apiPost, apiPut, apiDelete } from "../../api/client";
 import type { TravelData } from "../../types/database";
 
-export async function getAllTravels(db: SQLiteDatabase, userId: number): Promise<TravelData[]> {
-  return db.getAllAsync<TravelData>(
-    "SELECT * FROM travel WHERE user_id = ? ORDER BY start_date DESC",
-    [userId]
-  );
+export async function getAllTravels(): Promise<TravelData[]> {
+  return apiGet<TravelData[]>("/travels");
 }
 
 export async function getTravelById(
-  db: SQLiteDatabase,
   travelId: number
 ): Promise<TravelData | null> {
-  return db.getFirstAsync<TravelData>(
-    "SELECT * FROM travel WHERE travel_id = ?",
-    [travelId]
-  );
+  try {
+    return await apiGet<TravelData>(`/travels/${travelId}`);
+  } catch {
+    return null;
+  }
 }
 
 export async function insertTravel(
-  db: SQLiteDatabase,
   travel: Omit<TravelData, "travel_id">
 ): Promise<number> {
-  const result = await db.runAsync(
-    `INSERT INTO travel (user_id, description, start_date, end_date, countries, cover_image_uri)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [
-      travel.user_id,
-      travel.description,
-      travel.start_date,
-      travel.end_date,
-      travel.countries,
-      travel.cover_image_uri,
-    ]
-  );
-  return result.lastInsertRowId;
+  const res = await apiPost<TravelData>("/travels", {
+    description: travel.description,
+    start_date: travel.start_date,
+    end_date: travel.end_date,
+    countries: travel.countries,
+    cover_image_uri: travel.cover_image_uri,
+  });
+  return res.travel_id;
 }
 
-export async function updateTravel(
-  db: SQLiteDatabase,
-  travel: TravelData
-): Promise<void> {
-  await db.runAsync(
-    `UPDATE travel SET description = ?, start_date = ?, end_date = ?, countries = ?, cover_image_uri = ?
-     WHERE travel_id = ?`,
-    [
-      travel.description,
-      travel.start_date,
-      travel.end_date,
-      travel.countries,
-      travel.cover_image_uri,
-      travel.travel_id,
-    ]
-  );
+export async function updateTravel(travel: TravelData): Promise<void> {
+  await apiPut(`/travels/${travel.travel_id}`, {
+    description: travel.description,
+    start_date: travel.start_date,
+    end_date: travel.end_date,
+    countries: travel.countries,
+    cover_image_uri: travel.cover_image_uri,
+  });
 }
 
-export async function deleteTravel(
-  db: SQLiteDatabase,
-  travelId: number
-): Promise<void> {
-  await db.runAsync("DELETE FROM travel WHERE travel_id = ?", [travelId]);
+export async function deleteTravel(travelId: number): Promise<void> {
+  await apiDelete(`/travels/${travelId}`);
 }
